@@ -1,0 +1,16 @@
+.Role-container {
+    margin: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.Shopping-list-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.Accordion-header {
+    --bs-accordion-btn-bg: beige;
+    --bs-accordion-active-bg: beige;
+}

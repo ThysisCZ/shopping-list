@@ -1,0 +1,85 @@
+{
+    "id": 1,
+    "title": "Shopping List 1",
+    "users": [
+        {
+            "id": 1,
+            "name": "Alice",
+            "ownedLists": [
+                1,
+                2
+            ],
+            "memberships": [
+                1,
+                2,
+                3
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Bob",
+            "ownedLists": [
+                3,
+                4
+            ],
+            "memberships": [
+                1,
+                3,
+                4
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Carol",
+            "ownedLists": [
+                5,
+                6
+            ],
+            "memberships": [
+                1,
+                4,
+                5
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Steve",
+            "ownedLists": [
+                7,
+                8
+            ],
+            "memberships": [
+                5,
+                6
+            ]
+        },
+        {
+            "id": 5,
+            "name": "Layla",
+            "ownedLists": [
+                9,
+                10
+            ],
+            "memberships": [
+                6,
+                7
+            ]
+        }
+    ],
+    "defaultItems": [
+        {
+            "id": 1,
+            "name": "Apple",
+            "quantity": "2",
+            "unit": null,
+            "resolved": true
+        },
+        {
+            "id": 2,
+            "name": "Cheese",
+            "quantity": "50",
+            "unit": "g",
+            "resolved": false
+        }
+    ]
+}
