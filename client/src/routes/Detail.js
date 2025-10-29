@@ -1,30 +1,33 @@
 import ListHeader from '../components/ListHeader';
 import MemberList from '../components/MemberList';
 import ItemList from '../components/ItemList';
-import { useUserContext } from '../context/UserContext';
 import mockData from '../mockData.json';
 import { useState } from 'react';
 
-function Detail() {
-    const { currentUser } = useUserContext();
-    const [users, setUsers] = useState(mockData.users);
-    const isAuthorized = users.some(user =>
-        user.id === currentUser.id && user.memberships.includes(mockData.id)
-    )
+function Detail({ currentUser, users }) {
+    const [shoppingList, setShoppingList] = useState(mockData.shoppingList);
+    const isAuthorized = shoppingList.memberIds.includes(currentUser.id);
 
     return (
         <div>
             {isAuthorized ? (
                 <>
                     <ListHeader
+                        currentUser={currentUser}
                         users={users}
-                        setUsers={setUsers}
+                        shoppingList={shoppingList}
+                        setShoppingList={setShoppingList}
                     />
                     <MemberList
+                        currentUser={currentUser}
                         users={users}
-                        setUsers={setUsers}
+                        shoppingList={shoppingList}
+                        setShoppingList={setShoppingList}
                     />
-                    <ItemList />
+                    <ItemList
+                        shoppingList={shoppingList}
+                        setShoppingList={setShoppingList}
+                    />
                 </>
             ) : (
                 <>

@@ -2,30 +2,26 @@ import { useState } from 'react';
 import { Card, Form, Container, Col, Row, Button, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiPencil, mdiCheck, mdiCancel } from '@mdi/js';
-import { useUserContext } from '../context/UserContext';
-import mockData from '../mockData.json';
 import LeaveListModal from './LeaveListModal';
 
-function ListHeader({ users, setUsers }) {
-    const { currentUser } = useUserContext();
+function ListHeader({ currentUser, users, shoppingList, setShoppingList }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [edit, setEdit] = useState(mockData.title);
+    const [edit, setEdit] = useState(shoppingList.title);
     const [leaveListShow, setLeaveListShow] = useState(false);
 
-    const handleListLeft = () => {
-        const updatedUsers = users.map(user =>
-            user.id === currentUser.id ?
-                { ...user, memberships: user.memberships.filter(id => id !== mockData.id) } : user
-        )
+    const ownerId = shoppingList.ownerId
 
-        setUsers(updatedUsers);
+    const handleListLeft = () => {
+        const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== currentUser.id) }
+
+        setShoppingList(updatedList);
     }
 
     const handleLeaveListShow = () => {
         setLeaveListShow(true);
     }
 
-    const listOwner = users.find(user => user.ownedLists.some(id => id === mockData.id));
+    const listOwner = users.find(user => user.id === ownerId);
 
     // Change list title based on input field value
     function handleEdited(e) {
@@ -55,7 +51,7 @@ function ListHeader({ users, setUsers }) {
                                         ) : (
                                             <h2 className="mb-0">{edit}</h2>
                                         )}
-                                        {currentUser.ownedLists.some(id => id === mockData.id) && (
+                                        {currentUser.id === ownerId && (
                                             !isEditing ? (
                                                 <Button
                                                     variant="secondary"
@@ -87,7 +83,7 @@ function ListHeader({ users, setUsers }) {
                                 </Form>
                                 <small className="text-muted">Owner: {listOwner.name}</small>
                             </Col>
-                            {!currentUser.ownedLists.some(id => id === mockData.id) && (
+                            {currentUser.id !== ownerId && (
                                 <Col xs="auto">
                                     <Button
                                         variant="danger"
@@ -106,7 +102,7 @@ function ListHeader({ users, setUsers }) {
                 show={leaveListShow}
                 setLeaveListShow={setLeaveListShow}
                 onListLeave={handleListLeft}
-                list={mockData}
+                list={shoppingList}
             />
         </>
     )

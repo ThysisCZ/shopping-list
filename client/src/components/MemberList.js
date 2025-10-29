@@ -1,35 +1,26 @@
 import { Card, Container, Col, Row, Button, Stack, Accordion, ListGroup, Badge } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiAccount, mdiAccountPlus, mdiClose } from '@mdi/js';
-import { useUserContext } from '../context/UserContext';
-import mockData from '../mockData.json';
 import { useState } from 'react';
 import InviteMemberModal from './InviteMemberModal';
 import DeleteMemberModal from './DeleteMemberModal';
 
-function MemberList({ users, setUsers }) {
-    const { currentUser } = useUserContext();
+function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     const [inviteMemberShow, setInviteMemberShow] = useState(false);
     const [deleteMemberShow, setDeleteMemberShow] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
 
-    const handleMembersInvited = (userIds) => {
-        // Add new list ID to user's memberships
-        const updatedUsers = users.map(user =>
-            userIds.includes(user.id) ?
-                { ...user, memberships: [...user.memberships, mockData.id] } : user
-        );
+    const handleMembersInvited = (newIds) => {
+        // Add new IDs to shopping list member IDs
+        const updatedList = { ...shoppingList, memberIds: [...shoppingList.memberIds, ...newIds] }
 
-        setUsers(updatedUsers);
+        setShoppingList(updatedList);
     };
 
     const handleMemberDeleted = (member) => {
-        const updatedUsers = users.map(user =>
-            user.id === member.id ?
-                { ...user, memberships: user.memberships.filter(id => id !== mockData.id) } : user
-        );
+        const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== member.id) }
 
-        setUsers(updatedUsers);
+        setShoppingList(updatedList);
     };
 
     const handleInviteMemberShow = () => {
@@ -51,7 +42,7 @@ function MemberList({ users, setUsers }) {
                                 <h5 className="mb-0">Members</h5>
                             </Col>
                             <Col xs="auto">
-                                {currentUser.ownedLists.some(id => id === mockData.id) && (
+                                {currentUser.id === shoppingList.ownerId && (
                                     <Button
                                         variant="primary"
                                         size="sm"
@@ -69,7 +60,7 @@ function MemberList({ users, setUsers }) {
                     <Accordion.Body>
                         <ListGroup variant="flush" >
                             {users.map(user => (
-                                user.memberships.some(id => id === mockData.id) && (
+                                shoppingList.memberIds.includes(user.id) && (
                                     <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
                                         <Container>
                                             <Row>
@@ -77,13 +68,13 @@ function MemberList({ users, setUsers }) {
                                                     <Stack direction="horizontal" gap={3}>
                                                         <Icon path={mdiAccount} size={0.8} />
                                                         <b>{user.name}</b>
-                                                        {user.ownedLists.some(id => id === mockData.id) && (
+                                                        {user.id === shoppingList.ownerId && (
                                                             <Badge bg="primary">Owner</Badge>
                                                         )}
                                                     </Stack>
                                                 </Col>
                                                 <Col xs="auto">
-                                                    {currentUser.ownedLists.some(id => id === mockData.id) && !user.ownedLists.some(id => id === mockData.id) && (
+                                                    {currentUser.id === shoppingList.ownerId && user.id !== shoppingList.ownerId && (
                                                         <Button
                                                             variant="danger"
                                                             size="sm"
@@ -108,6 +99,7 @@ function MemberList({ users, setUsers }) {
                 setInviteMemberShow={setInviteMemberShow}
                 onMembersInvite={handleMembersInvited}
                 users={users}
+                list={shoppingList}
             />
 
             <DeleteMemberModal

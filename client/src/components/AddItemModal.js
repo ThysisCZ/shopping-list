@@ -1,8 +1,7 @@
 import { Modal, Form, Col, Row, Button } from 'react-bootstrap';
 import { useState } from 'react';
-import mockData from '../mockData.json';
 
-function AddItemModal({ show, setAddItemShow, onItemAdd }) {
+function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
     const defaultForm = {
         id: "",
         name: "",
@@ -13,7 +12,6 @@ function AddItemModal({ show, setAddItemShow, onItemAdd }) {
 
     const [validated, setValidated] = useState(false);
     const [formData, setFormData] = useState(defaultForm);
-    const items = mockData.defaultItems;
 
     const handleClose = () => {
         setAddItemShow(false)

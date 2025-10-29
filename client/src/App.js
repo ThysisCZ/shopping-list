@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Detail from './routes/Detail';
 
 function App() {
-  const { currentUser } = useUserContext();
+  const { currentUser, users, authenticate } = useUserContext();
 
   return (
     <>
@@ -17,12 +17,21 @@ function App() {
             </div>
           </div>
           <div>
-            <UserRoleSelector />
+            <UserRoleSelector
+              users={users}
+              authenticate={authenticate}
+            />
           </div>
         </div>
 
         <Routes>
-          <Route path="/detail" element={<Detail />}></Route>
+          <Route path="/detail" element={
+            <Detail
+              currentUser={currentUser}
+              users={users}
+            />
+          }
+          />
         </Routes>
       </BrowserRouter>
     </>

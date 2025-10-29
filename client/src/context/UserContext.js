@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import mockData from '../mockData';
+import mockData from '../mockData.json';
 
 // Create user context
 const UserContext = createContext();
@@ -12,22 +12,15 @@ export function useUserContext() {
 // Component that provides user context
 export function UserProvider({ children }) {
     const [currentUser, setCurrentUser] = useState({
-        id: 1,
-        name: "Alice",
-        ownedLists: [
-            1,
-            2
-        ],
-        memberships: [
-            1,
-            2,
-            3
-        ]
+        "id": "user_1",
+        "name": "Alice"
     });
+
+    const users = mockData.users;
 
     // Find user based on ID
     const authenticate = (userId) => {
-        const userData = mockData.users.find(user => user.id === parseInt(userId))
+        const userData = users.find(user => user.id === userId);
 
         if (userData) {
             setCurrentUser(userData)
@@ -36,7 +29,7 @@ export function UserProvider({ children }) {
 
     const value = {
         currentUser,
-        setCurrentUser,
+        users,
         authenticate
     }
 

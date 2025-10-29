@@ -2,9 +2,8 @@ import { Modal, Form, Col, Row, Button, ListGroup, Container, Stack } from 'reac
 import Icon from '@mdi/react';
 import { mdiAccount } from '@mdi/js';
 import { useState } from 'react';
-import mockData from '../mockData.json';
 
-function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users }) {
+function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, list }) {
     const [selectedUsers, setSelectedUsers] = useState([]);
 
     const handleClose = () => {
@@ -23,8 +22,8 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users }
 
     // Filter owner and users that are already members
     const availableUsers = users.filter(user => {
-        const isOwner = user.ownedLists.some(id => id === mockData.id);
-        const isMember = user.memberships.some(id => id === mockData.id);
+        const isOwner = user.id === list.ownerId;
+        const isMember = list.memberIds.includes(user.id);
         return !isOwner && !isMember;
     });
 

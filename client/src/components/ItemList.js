@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { Card, Form, Container, Col, Row, Button, Stack, Accordion, ListGroup } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiPlus, mdiClose } from '@mdi/js';
-import mockData from '../mockData.json';
 import AddItemModal from './AddItemModal';
 import DeleteItemModal from './DeleteItemModal';
 
-function ItemList() {
+function ItemList({ shoppingList, setShoppingList }) {
     const [showResolved, setShowResolved] = useState(false);
-    const [items, setItems] = useState(mockData.defaultItems);
     const [addItemShow, setAddItemShow] = useState(false);
     const [deleteItemShow, setDeleteItemShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+
+    const items = shoppingList.items;
 
     // Filter items based on toggle state
     const filteredItems = showResolved ? items :
@@ -19,19 +19,23 @@ function ItemList() {
 
     // Update resolved status of an item
     const handleResolvedStatus = (itemId) => {
-        setItems(items.map(item =>
-            item.id === itemId ?
-                { ...item, resolved: !item.resolved } : item
-        ));
+        const updatedItems = items.map(item =>
+            item.id === itemId ? { ...item, resolved: !item.resolved } : item
+        )
+
+        setShoppingList({ ...shoppingList, items: updatedItems });
     }
 
     const handleItemAdded = (item) => {
-        setItems([...items, item]);
+        setShoppingList({
+            ...shoppingList,
+            items: [...shoppingList.items, item]
+        });
     }
 
     const handleItemDeleted = (item) => {
         const updatedItems = items.filter(i => i.id !== item.id);
-        setItems(updatedItems);
+        setShoppingList({ ...shoppingList, items: updatedItems });
     }
 
     const handleAddItemShow = () => {
@@ -119,6 +123,7 @@ function ItemList() {
                 show={addItemShow}
                 setAddItemShow={setAddItemShow}
                 onItemAdd={handleItemAdded}
+                items={items}
             />
 
             <DeleteItemModal
