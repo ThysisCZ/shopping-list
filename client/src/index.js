@@ -5,12 +5,15 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserProvider } from './context/UserContext';
+import { ShoppingListsProvider } from './context/ShoppingListsContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <UserProvider>
-      <App />
+      <ShoppingListsProvider>
+        <App />
+      </ShoppingListsProvider>
     </UserProvider>
   </React.StrictMode>
 );

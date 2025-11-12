@@ -1,11 +1,14 @@
 import './App.css';
 import UserRoleSelector from './components/UserRoleSelector';
 import { useUserContext } from './context/UserContext';
+import { useShoppingListsContext } from './context/ShoppingListsContext';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Detail from './routes/Detail';
+import ShoppingLists from './routes/ShoppingLists';
 
 function App() {
   const { currentUser, users, authenticate } = useUserContext();
+  const { shoppingLists } = useShoppingListsContext();
 
   return (
     <>
@@ -25,10 +28,12 @@ function App() {
         </div>
 
         <Routes>
-          <Route path="/detail" element={
+          <Route path="/list" element={<ShoppingLists />} />
+          <Route path="/detail/:id" element={
             <Detail
               currentUser={currentUser}
               users={users}
+              shoppingLists={shoppingLists}
             />
           }
           />

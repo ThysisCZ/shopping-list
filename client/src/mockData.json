@@ -1,30 +1,79 @@
 {
-    "shoppingList": {
-        "id": "list_1",
-        "title": "Shopping List 1",
-        "ownerId": "user_1",
-        "memberIds": [
-            "user_1",
-            "user_2",
-            "user_3"
-        ],
-        "items": [
-            {
-                "id": "item_1",
-                "name": "Apple",
-                "quantity": 2,
-                "unit": null,
-                "resolved": true
-            },
-            {
-                "id": "item_2",
-                "name": "Cheese",
-                "quantity": 50,
-                "unit": "g",
-                "resolved": false
-            }
-        ]
-    },
+    "shoppingLists": [
+        {
+            "id": "list_1",
+            "title": "Shopping List 1",
+            "ownerId": "user_1",
+            "memberIds": [
+                "user_1",
+                "user_2",
+                "user_3"
+            ],
+            "items": [
+                {
+                    "id": "item_1",
+                    "name": "Apple",
+                    "quantity": 2,
+                    "unit": null,
+                    "resolved": true
+                },
+                {
+                    "id": "item_2",
+                    "name": "Cheese",
+                    "quantity": 50,
+                    "unit": "g",
+                    "resolved": false
+                }
+            ],
+            "archived": false
+        },
+        {
+            "id": "list_2",
+            "title": "Shopping List 2",
+            "ownerId": "user_2",
+            "memberIds": [
+                "user_2",
+                "user_1"
+            ],
+            "items": [
+                {
+                    "id": "item_3",
+                    "name": "Bread",
+                    "quantity": 1,
+                    "unit": "pc",
+                    "resolved": false
+                },
+                {
+                    "id": "item_4",
+                    "name": "Milk",
+                    "quantity": 2,
+                    "unit": "l",
+                    "resolved": false
+                }
+            ],
+            "archived": false
+        },
+        {
+            "id": "list_3",
+            "title": "Shopping List 3",
+            "ownerId": "user_1",
+            "memberIds": [
+                "user_1",
+                "user_4",
+                "user_5"
+            ],
+            "items": [
+                {
+                    "id": "item_5",
+                    "name": "Cake",
+                    "quantity": 1,
+                    "unit": "pc",
+                    "resolved": true
+                }
+            ],
+            "archived": true
+        }
+    ],
     "users": [
         {
             "id": "user_1",
