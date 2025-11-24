@@ -29,7 +29,7 @@ function LeaveListModal({ show, setLeaveListShow, onListLeave, list }) {
                                 Cancel
                             </Button>
                             <Button variant="danger" type="submit">
-                                Delete
+                                Leave
                             </Button>
                         </div>
                     </div>

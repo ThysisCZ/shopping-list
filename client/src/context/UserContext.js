@@ -12,7 +12,7 @@ export function useUserContext() {
 // Component that provides user context
 export function UserProvider({ children }) {
     const [currentUser, setCurrentUser] = useState({
-        "id": "user_1",
+        "id": "1",
         "name": "Alice"
     });
 

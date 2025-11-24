@@ -1,5 +1,9 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import mockData from '../mockData.json';
+import { useUserContext } from './UserContext';
+
+const SERVER_URI = process.env.REACT_APP_SERVER_URI;
+const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 // Create shopping lists context
 const ShoppingListsContext = createContext();
@@ -14,70 +18,204 @@ export function ShoppingListsProvider({ children }) {
     // Initialize with shopping lists from mockData
     const initialLists = (mockData.shoppingLists);
     const [shoppingLists, setShoppingLists] = useState(initialLists);
+    const [showArchived, setShowArchived] = useState(false);
+    const shoppingListsRef = useRef(shoppingLists);
+    const { currentUser } = useUserContext();
+
+    // Keep reference updated
+    useEffect(() => {
+        shoppingListsRef.current = shoppingLists;
+    }, [shoppingLists]);
 
     // Get all shopping lists
-    const getAllLists = () => {
-        return shoppingLists;
+    const getAllLists = async () => {
+        if (USE_MOCKS) {
+            return shoppingListsRef.current
+        } else {
+            // Call the server
+            const dtoIn = {
+                archived: true
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/list`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: " + e.message);
+            }
+        }
     }
 
     // Get a shopping list by ID
-    const getListById = (listId) => {
-        return shoppingLists.find(list => list.id === listId);
-    }
+    const getListById = async (listId) => {
+        if (USE_MOCKS) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const list = shoppingListsRef.current.find(list => list.listId === listId);
+                    resolve(list);
+                }, 200);
+            });
+        } else {
+            const dtoIn = {
+                listId: listId
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/get`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: " + e.message);
+            }
+        }
+    };
 
     // Get shopping lists where the user is a member or owner
-    const getListsByUser = (userId) => {
-        return shoppingLists.filter(list =>
-            list.ownerId === userId || list.memberIds.includes(userId)
-        );
-    }
+    const getListsByUser = useCallback(async (userId) => {
+        if (USE_MOCKS) {
+            // Call mock data
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const result = shoppingListsRef.current.filter(list =>
+                        list.memberIds.includes(userId)
+                    );
+
+                    const dtoOut = showArchived ? result
+                        : result.filter(list => !list.archived)
+
+                    resolve(dtoOut);
+                }, 200);
+            });
+        } else {
+            // Call the server
+            const dtoIn = {
+                archived: showArchived
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/list`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const result = await response.json();
+                const dtoOut = result.itemList.filter(list => list.memberIds.includes(userId));
+
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: " + e.message);
+            }
+        }
+    }, [showArchived]);
 
     // Archive a shopping list
     const archiveList = (listId) => {
-        setShoppingLists(prevLists =>
-            prevLists.map(l =>
-                l.id === listId ? { ...l, archived: true } : l
-            )
-        );
+        return new Promise(resolve => {
+            setTimeout(() => {
+                setShoppingLists(prevLists =>
+                    prevLists.map(list =>
+                        list.listId === listId ? { ...list, archived: true } : list
+                    )
+                );
+                resolve();
+            }, 200);
+        });
     }
 
     // Unarchive a shopping list
     const unarchiveList = (listId) => {
-        setShoppingLists(prevLists =>
-            prevLists.map(l =>
-                l.id === listId ? { ...l, archived: false } : l
-            )
-        );
+        return new Promise(resolve => {
+            setTimeout(() => {
+                setShoppingLists(prevLists =>
+                    prevLists.map(list =>
+                        list.listId === listId ? { ...list, archived: false } : list
+                    )
+                );
+                resolve();
+            }, 200);
+        });
     }
 
     // Update a shopping list
-    const updateList = (updatedList) => {
-        setShoppingLists(prevLists =>
-            prevLists.map(list =>
-                list.id === updatedList.id ? updatedList : list
-            )
-        );
-    }
+    const updateList = async (updatedList) => {
+        if (USE_MOCKS) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    setShoppingLists(prev =>
+                        prev.map(list =>
+                            list.listId === updatedList.listId ? updatedList : list
+                        )
+                    );
+                    resolve();
+                }, 200);
+            });
+        } else {
+            // Call the server
+            const dtoIn = {
+                listId: updatedList.listId,
+                title: updatedList.title,
+                archived: updatedList.archived
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error updating list:", e.message);
+            }
+        }
+    };
 
     // Add a new shopping list
     const addList = (newList) => {
-        // Ensure archived property is set
-        const listWithArchived = {
-            ...newList,
-            archived: newList.archived ?? false
-        };
-        setShoppingLists(prevLists => [...prevLists, listWithArchived]);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const listWithIds = {
+                    ...newList,
+                    listId: Date.now().toString(),
+                    ownerId: currentUser.id,
+                    memberIds: [currentUser.id]
+                };
+
+                setShoppingLists(prev => [...prev, listWithIds]);
+                resolve(listWithIds);
+            }, 200);
+        });
     }
 
     // Delete a shopping list
     const deleteList = (listId) => {
-        setShoppingLists(prevLists =>
-            prevLists.filter(list => list.id !== listId)
-        );
+        return new Promise(resolve => {
+            setTimeout(() => {
+                setShoppingLists(prevLists =>
+                    prevLists.filter(list => list.listId !== listId)
+                );
+                resolve();
+            }, 200);
+        });
     }
 
     const value = {
         shoppingLists,
+        setShoppingLists,
         getAllLists,
         getListById,
         getListsByUser,
@@ -85,7 +223,9 @@ export function ShoppingListsProvider({ children }) {
         unarchiveList,
         updateList,
         addList,
-        deleteList
+        deleteList,
+        showArchived,
+        setShowArchived
     }
 
     return (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, ListGroup, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
@@ -7,75 +7,221 @@ import { useUserContext } from '../context/UserContext';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import AddListModal from '../components/AddListModal';
 import DeleteListModal from '../components/DeleteListModal';
+import { ClipLoader } from 'react-spinners';
+
+const SERVER_URI = process.env.REACT_APP_SERVER_URI;
+const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function ShoppingLists() {
     const navigate = useNavigate();
     const { currentUser } = useUserContext();
     const {
+        shoppingLists,
         getListsByUser,
         getListById,
-        getAllLists,
         archiveList,
         unarchiveList,
         deleteList,
         addList,
-        updateList
+        updateList,
+        showArchived,
+        setShowArchived
     } = useShoppingListsContext();
 
-    const [showArchived, setShowArchived] = useState(false);
     const [addListShow, setAddListShow] = useState(false);
     const [deleteListShow, setDeleteListShow] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
+    const [userLists, setUserLists] = useState([]);
+    const [userListsCall, setUserListsCall] = useState({ state: "pending" });
 
     // Get lists where user is owner or member
-    let userLists = getListsByUser(currentUser.id);
+    const refreshUserLists = useCallback(async () => {
+        setUserListsCall({ state: "pending" });
 
-    // Filter by archived status
-    const filteredLists = showArchived
-        ? userLists
-        : userLists.filter(list => !list.archived);
+        try {
+            const data = await getListsByUser(currentUser.id);
+
+            if (data) {
+                setUserLists(data);
+                setUserListsCall({ state: "success", data });
+            } else {
+                setUserListsCall({ state: "error", error: "Failed to load shopping lists." });
+            }
+        } catch (e) {
+            setUserListsCall({ state: "error", error: e.message });
+        }
+    }, [currentUser.id, getListsByUser]);
+
+    useEffect(() => {
+        refreshUserLists();
+    }, [refreshUserLists]);
 
     // Handle item resolved status toggle
-    const handleItemResolved = (listId, itemId) => {
-        const list = getListById(listId);
-        if (!list) return;
+    const handleItemResolved = async (listId, itemId) => {
+        const list = await getListById(listId);
 
-        const updatedItems = list.items.map(item =>
-            item.id === itemId ? { ...item, resolved: !item.resolved } : item
-        );
+        // Find the item and toggle resolved
+        const updatedItem = list.items.find(item => item.itemId === itemId);
+        updatedItem.resolved = !updatedItem.resolved;
 
-        updateList({ ...list, items: updatedItems });
+        if (USE_MOCKS) {
+            // Call mock data
+            const updatedItems = list.items.map(item =>
+                item.itemId === itemId ? updatedItem : item
+            );
+            const updatedList = { ...list, items: updatedItems };
+
+            await updateList(updatedList);
+        } else {
+            // Call the server
+            try {
+                const dtoIn = {
+                    itemId: updatedItem.itemId,
+                    resolved: updatedItem.resolved
+                }
+
+                const response = await fetch(`${SERVER_URI}listItem/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                // Refresh without loading
+                const refreshed = await getListsByUser(currentUser.id);
+                setUserLists(refreshed);
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error:", e.message);
+            }
+        }
     };
 
     // Handle item deletion
-    const handleItemDelete = (listId, itemId) => {
-        const list = getListById(listId);
-        if (!list) return;
+    const handleItemDelete = async (listId, itemId) => {
+        const list = await getListById(listId);
+        const deletedItem = list.items.find(item => item.itemId === itemId);
 
-        const updatedItems = list.items.filter(item => item.id !== itemId);
-        updateList({ ...list, items: updatedItems });
+        if (USE_MOCKS) {
+            const updatedItems = list.items.filter(item => item.itemId !== deletedItem.itemId);
+
+            const updatedList = { ...list, items: updatedItems };
+            await updateList(updatedList);
+
+            const refreshed = await getListsByUser(currentUser.id);
+            setUserLists(refreshed);
+        } else {
+            const dtoIn = {
+                itemId: deletedItem.itemId
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}listItem/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const refreshed = await getListsByUser(currentUser.id);
+                setUserLists(refreshed);
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: " + e.message);
+            }
+        }
     };
 
     // Handle list deletion
-    const handleListDelete = (listId) => {
-        deleteList(listId);
+    const handleListDelete = async (listId) => {
         setDeleteListShow(false);
         setSelectedList(null);
+
+        if (USE_MOCKS) {
+            await deleteList(listId);
+            refreshUserLists();
+        } else {
+            const dtoIn = {
+                listId: listId
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                refreshUserLists();
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: " + e.message);
+            }
+        }
     };
 
     // Handle list archiving
-    const handleArchive = (listId) => {
-        const list = getListById(listId);
-        if (list && list.archived) {
-            unarchiveList(listId);
+    const handleArchive = async (listId) => {
+        const list = await getListById(listId);
+
+        if (USE_MOCKS) {
+            list.archived ? await unarchiveList(listId) : await archiveList(listId);
+            refreshUserLists();
         } else {
-            archiveList(listId);
+            const dtoIn = {
+                listId: list.listId,
+                title: list.title,
+                archived: !list.archived
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                refreshUserLists();
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
         }
     };
 
     // Handle add list
-    const handleListAdd = (newList) => {
-        addList(newList);
+    const handleListAdd = async (newList) => {
+        if (USE_MOCKS) {
+            await addList(newList);
+            refreshUserLists();
+        } else {
+
+            const dtoIn = {
+                title: newList.title,
+                ownerId: newList.ownerId
+            };
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn),
+                });
+
+                refreshUserLists();
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     };
 
     // Handle view detail navigation
@@ -113,100 +259,104 @@ function ShoppingLists() {
             </Row>
 
             <Row>
-                {filteredLists.map(list => (
-                    <Col key={list.id} md={6} lg={4} className="mb-4">
-                        <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                            <Card.Header style={{ backgroundColor: "salmon" }}>
-                                <h5 className="mb-0">{list.title}</h5>
-                            </Card.Header>
-                            <Card.Body style={{ flex: 1, overflowY: 'auto', backgroundColor: "lightsalmon" }}>
-                                <ListGroup variant="flush">
-                                    {list.items.length > 0 ? (
-                                        list.items.map(item => (
-                                            <ListGroup.Item key={item.id} style={{ backgroundColor: "lightsalmon" }}>
-                                                <Stack direction="horizontal" gap={2}>
-                                                    <Form.Check
-                                                        type="checkbox"
-                                                        checked={item.resolved}
-                                                        onChange={() => handleItemResolved(list.id, item.id)}
-                                                    />
-                                                    <div style={{ flex: 1 }}>
-                                                        <span style={{
-                                                            textDecoration: item.resolved ? 'line-through' : 'none'
-                                                        }}>
-                                                            {item.name}
-                                                        </span>
-                                                        {item.quantity && (
-                                                            <span className="text-muted ms-2">
-                                                                {item.quantity} {item.unit || ''}
+                {userListsCall.state === "pending" ?
+                    <div className="d-flex justify-content-center">
+                        <ClipLoader />
+                    </div> :
+                    userLists.map(list => (
+                        <Col key={list.listId} md={6} lg={4} className="mb-4">
+                            <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                                <Card.Header style={{ backgroundColor: "salmon" }}>
+                                    <h5 className="mb-0">{list.title}</h5>
+                                </Card.Header>
+                                <Card.Body style={{ flex: 1, overflowY: 'auto', backgroundColor: "lightsalmon" }}>
+                                    <ListGroup variant="flush">
+                                        {list.items.length > 0 ? (
+                                            list.items.map(item => (
+                                                <ListGroup.Item key={item.itemId} style={{ backgroundColor: "lightsalmon" }}>
+                                                    <Stack direction="horizontal" gap={2}>
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={item.resolved}
+                                                            onChange={() => handleItemResolved(list.listId, item.itemId)}
+                                                        />
+                                                        <div style={{ flex: 1 }}>
+                                                            <span style={{
+                                                                textDecoration: item.resolved ? 'line-through' : 'none'
+                                                            }}>
+                                                                {item.name}
                                                             </span>
-                                                        )}
-                                                    </div>
-                                                    <Button
-                                                        variant="danger"
-                                                        size="sm"
-                                                        onClick={() => handleItemDelete(list.id, item.id)}
-                                                    >
-                                                        <Icon path={mdiClose} size={0.7} />
-                                                    </Button>
-                                                </Stack>
+                                                            {item.quantity && (
+                                                                <span className="text-muted ms-2">
+                                                                    {item.quantity} {item.unit || ''}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() => handleItemDelete(list.listId, item.itemId)}
+                                                        >
+                                                            <Icon path={mdiClose} size={0.7} />
+                                                        </Button>
+                                                    </Stack>
+                                                </ListGroup.Item>
+                                            ))
+                                        ) : (
+                                            <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
+                                                No items
                                             </ListGroup.Item>
-                                        ))
-                                    ) : (
-                                        <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
-                                            No items
-                                        </ListGroup.Item>
-                                    )}
-                                </ListGroup>
-                            </Card.Body>
-                            <Card.Footer style={{ backgroundColor: "salmon" }}>
-                                <Stack direction="horizontal" gap={2} className="justify-content-end">
-                                    {isOwner(list) && (
-                                        <>
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setSelectedList(list);
-                                                    setDeleteListShow(true);
-                                                }}
-                                            >
-                                                <Icon path={mdiDelete} size={0.7} /> Delete
-                                            </Button>
-                                            <Button
-                                                variant={list.archived ? "secondary" : "warning"}
-                                                size="sm"
-                                                onClick={() => handleArchive(list.id)}
-                                            >
-                                                {list.archived ? (
-                                                    <>
-                                                        <Icon path={mdiArchiveOff} size={0.7} />
-                                                        <span> Unarchive</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Icon path={mdiArchive} size={0.7} />
-                                                        <span> Archive</span>
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </>
-                                    )}
-                                    <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={() => handleViewDetail(list.id)}
-                                    >
-                                        <Icon path={mdiEye} size={0.7} /> Detail
-                                    </Button>
-                                </Stack>
-                            </Card.Footer>
-                        </Card>
-                    </Col>
-                ))}
+                                        )}
+                                    </ListGroup>
+                                </Card.Body>
+                                <Card.Footer style={{ backgroundColor: "salmon" }}>
+                                    <Stack direction="horizontal" gap={2} className="justify-content-end">
+                                        {isOwner(list) && (
+                                            <>
+                                                <Button
+                                                    variant="danger"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setSelectedList(list);
+                                                        setDeleteListShow(true);
+                                                    }}
+                                                >
+                                                    <Icon path={mdiDelete} size={0.7} /> Delete
+                                                </Button>
+                                                <Button
+                                                    variant={list.archived ? "secondary" : "warning"}
+                                                    size="sm"
+                                                    onClick={() => handleArchive(list.listId)}
+                                                >
+                                                    {list.archived ? (
+                                                        <>
+                                                            <Icon path={mdiArchiveOff} size={0.7} />
+                                                            <span> Unarchive</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Icon path={mdiArchive} size={0.7} />
+                                                            <span> Archive</span>
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </>
+                                        )}
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleViewDetail(list.listId)}
+                                        >
+                                            <Icon path={mdiEye} size={0.7} /> Detail
+                                        </Button>
+                                    </Stack>
+                                </Card.Footer>
+                            </Card>
+                        </Col>
+                    ))}
             </Row>
 
-            {filteredLists.length === 0 && (
+            {userLists.length === 0 && userListsCall.state !== "pending" && (
                 <Row>
                     <Col className="text-center text-muted mt-4">
                         <p>No shopping lists found.</p>
@@ -218,8 +368,8 @@ function ShoppingLists() {
                 show={addListShow}
                 setAddListShow={setAddListShow}
                 onListAdd={handleListAdd}
-                shoppingLists={getAllLists()}
-                currentUserId={currentUser.id}
+                shoppingLists={shoppingLists}
+                currentUser={currentUser}
             />
 
             <DeleteListModal

@@ -1,24 +1,24 @@
 {
     "shoppingLists": [
         {
-            "id": "list_1",
+            "listId": "list_1",
             "title": "Shopping List 1",
-            "ownerId": "user_1",
+            "ownerId": "1",
             "memberIds": [
-                "user_1",
-                "user_2",
-                "user_3"
+                "1",
+                "2",
+                "3"
             ],
             "items": [
                 {
-                    "id": "item_1",
+                    "itemId": "item_1",
                     "name": "Apple",
                     "quantity": 2,
                     "unit": null,
                     "resolved": true
                 },
                 {
-                    "id": "item_2",
+                    "itemId": "item_2",
                     "name": "Cheese",
                     "quantity": 50,
                     "unit": "g",
@@ -28,23 +28,23 @@
             "archived": false
         },
         {
-            "id": "list_2",
+            "listId": "list_2",
             "title": "Shopping List 2",
-            "ownerId": "user_2",
+            "ownerId": "2",
             "memberIds": [
-                "user_2",
-                "user_1"
+                "2",
+                "1"
             ],
             "items": [
                 {
-                    "id": "item_3",
+                    "itemId": "item_3",
                     "name": "Bread",
                     "quantity": 1,
                     "unit": "pc",
                     "resolved": false
                 },
                 {
-                    "id": "item_4",
+                    "itemId": "item_4",
                     "name": "Milk",
                     "quantity": 2,
                     "unit": "l",
@@ -54,17 +54,17 @@
             "archived": false
         },
         {
-            "id": "list_3",
+            "listId": "list_3",
             "title": "Shopping List 3",
-            "ownerId": "user_1",
+            "ownerId": "1",
             "memberIds": [
-                "user_1",
-                "user_4",
-                "user_5"
+                "1",
+                "4",
+                "5"
             ],
             "items": [
                 {
-                    "id": "item_5",
+                    "itemId": "item_5",
                     "name": "Cake",
                     "quantity": 1,
                     "unit": "pc",
@@ -76,23 +76,23 @@
     ],
     "users": [
         {
-            "id": "user_1",
+            "id": "1",
             "name": "Alice"
         },
         {
-            "id": "user_2",
+            "id": "2",
             "name": "Bob"
         },
         {
-            "id": "user_3",
+            "id": "3",
             "name": "Carol"
         },
         {
-            "id": "user_4",
+            "id": "4",
             "name": "Steve"
         },
         {
-            "id": "user_5",
+            "id": "5",
             "name": "Layla"
         }
     ]

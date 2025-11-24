@@ -3,26 +3,29 @@ import { Card, Form, Container, Col, Row, Button, Stack } from 'react-bootstrap'
 import Icon from '@mdi/react';
 import { mdiPencil, mdiCheck, mdiCancel } from '@mdi/js';
 import LeaveListModal from './LeaveListModal';
+import { useNavigate } from 'react-router-dom';
 
 function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppingLists }) {
     const [isEditing, setIsEditing] = useState(false);
     const [edit, setEdit] = useState(shoppingList.title);
     const [leaveListShow, setLeaveListShow] = useState(false);
     const [validated, setValidated] = useState(false);
+    const navigate = useNavigate();
 
-    // Sync edit state when shoppingList title changes (but not when editing)
+    // Sync edit state when shopping list title changes
     useEffect(() => {
         if (!isEditing) {
             setEdit(shoppingList.title);
         }
     }, [shoppingList.title, isEditing]);
 
-    const ownerId = shoppingList.ownerId
+    const ownerId = shoppingList.ownerId;
 
     const handleListLeft = () => {
         const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== currentUser.id) }
 
         setShoppingList(updatedList);
+        navigate("/list");
     }
 
     const handleLeaveListShow = () => {
@@ -43,13 +46,13 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
         }
 
         // Check for duplicates before saving
-        const isDuplicate = shoppingLists.find(
-            (list) => list.id !== shoppingList.id &&
+        const isDuplicate = shoppingLists.some(
+            (list) => list.listId !== shoppingList.listId &&
                 list.title.toLowerCase() === edit.toLowerCase()
         );
 
         if (isDuplicate) {
-            return; // Don't save if duplicate
+            return;
         }
 
         // Update the shopping list with new title
@@ -79,8 +82,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                     onChange={(e) => {
                                                         const inputValue = e.target.value;
                                                         setEdit(inputValue);
-                                                        const isDuplicate = shoppingLists.find(
-                                                            (list) => list.id !== shoppingList.id &&
+                                                        const isDuplicate = shoppingLists.some(
+                                                            (list) => list.listId !== shoppingList.listId &&
                                                                 list.title.toLowerCase() === inputValue.toLowerCase()
                                                         );
                                                         e.target.setCustomValidity(isDuplicate ? "Duplicate" : "");
@@ -90,8 +93,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                     isInvalid={
                                                         validated && (
                                                             edit.length === 0 ||
-                                                            shoppingLists.find(
-                                                                (list) => list.id !== shoppingList.id &&
+                                                            shoppingLists.some(
+                                                                (list) => list.listId !== shoppingList.listId &&
                                                                     list.title.toLowerCase() === edit.toLowerCase()
                                                             )
                                                         )
@@ -99,8 +102,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                 />
                                                 <Form.Control.Feedback type="invalid">
                                                     {validated && edit.length === 0 && "This field is required."}
-                                                    {validated && shoppingLists.find(
-                                                        (list) => list.id !== shoppingList.id &&
+                                                    {validated && shoppingLists.some(
+                                                        (list) => list.listId !== shoppingList.listId &&
                                                             list.title.toLowerCase() === edit.toLowerCase()
                                                     ) && "A list with this title already exists."}
                                                 </Form.Control.Feedback>

@@ -1,12 +1,12 @@
 import { Modal, Form, Button } from 'react-bootstrap';
 import { useState } from 'react';
 
-function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentUserId }) {
+function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentUser }) {
     const defaultForm = {
-        id: "",
+        listId: "",
         title: "",
-        ownerId: currentUserId,
-        memberIds: [currentUserId],
+        ownerId: currentUser.id,
+        memberIds: [currentUser.id],
         items: [],
         archived: false
     }
@@ -25,15 +25,6 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
         setFormData(formData => ({ ...formData, [key]: value }))
     }
 
-    // Generate unique ID for new list
-    const generateListId = () => {
-        const maxId = shoppingLists.reduce((max, list) => {
-            const num = parseInt(list.id.replace('list_', ''));
-            return num > max ? num : max;
-        }, 0);
-        return `list_${maxId + 1}`;
-    }
-
     // Update current data after form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -43,8 +34,7 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
         if (!e.target.checkValidity()) return;
 
         const newList = {
-            ...formData,
-            id: generateListId()
+            ...formData
         };
 
         onListAdd(newList);
@@ -71,7 +61,7 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                             value={formData.title}
                             onChange={(e) => {
                                 setField("title", e.target.value);
-                                const isDuplicate = shoppingLists.find(
+                                const isDuplicate = shoppingLists.some(
                                     (list) => list.title.toLowerCase() === e.target.value.toLowerCase()
                                 );
                                 e.target.setCustomValidity(isDuplicate ? "Duplicate" : "");
@@ -80,12 +70,12 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                             required
                             isInvalid={
                                 (validated && formData.title.length === 0) ||
-                                (validated && shoppingLists.find((list) => list.title.toLowerCase() === formData.title.toLowerCase()))
+                                (validated && shoppingLists.some((list) => list.title.toLowerCase() === formData.title.toLowerCase()))
                             }
                         />
                         <Form.Control.Feedback type="invalid">
                             {validated && formData.title.length === 0 && "This field is required."}
-                            {validated && shoppingLists.find((list) => list.title.toLowerCase() === formData.title.toLowerCase())
+                            {validated && shoppingLists.some((list) => list.title.toLowerCase() === formData.title.toLowerCase())
                                 && "A list with this title already exists."}
                         </Form.Control.Feedback>
                     </Form.Group>

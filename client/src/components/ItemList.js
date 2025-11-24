@@ -20,7 +20,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     // Update resolved status of an item
     const handleResolvedStatus = (itemId) => {
         const updatedItems = items.map(item =>
-            item.id === itemId ? { ...item, resolved: !item.resolved } : item
+            item.itemId === itemId ? { ...item, resolved: !item.resolved } : item
         )
 
         setShoppingList({ ...shoppingList, items: updatedItems });
@@ -34,7 +34,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     }
 
     const handleItemDeleted = (item) => {
-        const updatedItems = items.filter(i => i.id !== item.id);
+        const updatedItems = items.filter(i => i.itemId !== item.itemId);
         setShoppingList({ ...shoppingList, items: updatedItems });
     }
 
@@ -79,7 +79,7 @@ function ItemList({ shoppingList, setShoppingList }) {
                     <Accordion.Body>
                         <ListGroup variant="flush">
                             {filteredItems.map(item => (
-                                <ListGroup.Item key={item.id} style={{ backgroundColor: 'lightsalmon' }}>
+                                <ListGroup.Item key={item.itemId} style={{ backgroundColor: 'lightsalmon' }}>
                                     <Container>
                                         <Row>
                                             <Col>
@@ -87,7 +87,7 @@ function ItemList({ shoppingList, setShoppingList }) {
                                                     <Form.Check
                                                         type="checkbox"
                                                         checked={item.resolved}
-                                                        onChange={() => handleResolvedStatus(item.id)}
+                                                        onChange={() => handleResolvedStatus(item.itemId)}
                                                     />
                                                     <b style={{
                                                         textDecoration: item.resolved ? 'line-through' : 'none'

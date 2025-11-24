@@ -11,7 +11,7 @@ function DeleteListModal({ show, setDeleteListShow, onListDelete, list }) {
         e.preventDefault();
         e.stopPropagation();
 
-        onListDelete(list.id);
+        onListDelete(list.listId);
         setDeleteListShow(false);
     }
 
