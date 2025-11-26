@@ -179,13 +179,13 @@ export function ShoppingListsProvider({ children }) {
                 const dtoOut = await response.json();
                 return dtoOut;
             } catch (e) {
-                console.error("Error updating list:", e.message);
+                console.error("Error: ", e.message);
             }
         }
     };
 
     // Add a new shopping list
-    const addList = (newList) => {
+    const addList = async (newList) => {
         return new Promise(resolve => {
             setTimeout(() => {
                 const listWithIds = {

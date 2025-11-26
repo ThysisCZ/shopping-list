@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 
 function Detail({ currentUser, users, shoppingLists }) {
     const { id } = useParams();
-    const { getListById, updateList } = useShoppingListsContext();
+    const { getListById } = useShoppingListsContext();
     const [shoppingList, setShoppingList] = useState(null);
     const [shoppingListCall, setShoppingListCall] = useState(null);
 
@@ -43,11 +43,6 @@ function Detail({ currentUser, users, shoppingLists }) {
 
     const isAuthorized = shoppingList && shoppingList.memberIds.includes(currentUser.id);
 
-    const setShoppingListWrapper = async (updatedList) => {
-        await updateList(updatedList);
-        setShoppingList(updatedList);
-    };
-
     return (
         <div>
             {isAuthorized ? (
@@ -56,7 +51,7 @@ function Detail({ currentUser, users, shoppingLists }) {
                         currentUser={currentUser}
                         users={users}
                         shoppingList={shoppingList}
-                        setShoppingList={setShoppingListWrapper}
+                        setShoppingList={setShoppingList}
                         shoppingLists={shoppingLists}
 
                     />
@@ -64,11 +59,11 @@ function Detail({ currentUser, users, shoppingLists }) {
                         currentUser={currentUser}
                         users={users}
                         shoppingList={shoppingList}
-                        setShoppingList={setShoppingListWrapper}
+                        setShoppingList={setShoppingList}
                     />
                     <ItemList
                         shoppingList={shoppingList}
-                        setShoppingList={setShoppingListWrapper}
+                        setShoppingList={setShoppingList}
                     />
                 </>
             ) : (

@@ -17,6 +17,7 @@ function ShoppingLists() {
     const { currentUser } = useUserContext();
     const {
         shoppingLists,
+        setShoppingLists,
         getListsByUser,
         getListById,
         archiveList,
@@ -201,17 +202,16 @@ function ShoppingLists() {
             await addList(newList);
             refreshUserLists();
         } else {
-
             const dtoIn = {
                 title: newList.title,
                 ownerId: newList.ownerId
-            };
+            }
 
             try {
                 const response = await fetch(`${SERVER_URI}shoppingList/create`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn),
+                    body: JSON.stringify(dtoIn)
                 });
 
                 refreshUserLists();
@@ -369,6 +369,7 @@ function ShoppingLists() {
                 setAddListShow={setAddListShow}
                 onListAdd={handleListAdd}
                 shoppingLists={shoppingLists}
+                setShoppingLists={setShoppingLists}
                 currentUser={currentUser}
             />
 

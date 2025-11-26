@@ -4,6 +4,10 @@ import Icon from '@mdi/react';
 import { mdiPencil, mdiCheck, mdiCancel } from '@mdi/js';
 import LeaveListModal from './LeaveListModal';
 import { useNavigate } from 'react-router-dom';
+import { useShoppingListsContext } from '../context/ShoppingListsContext';
+
+const SERVER_URI = process.env.REACT_APP_SERVER_URI;
+const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppingLists }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -11,6 +15,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
     const [leaveListShow, setLeaveListShow] = useState(false);
     const [validated, setValidated] = useState(false);
     const navigate = useNavigate();
+    const { updateList } = useShoppingListsContext();
 
     // Sync edit state when shopping list title changes
     useEffect(() => {
@@ -21,11 +26,31 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
 
     const ownerId = shoppingList.ownerId;
 
-    const handleListLeft = () => {
-        const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== currentUser.id) }
-
-        setShoppingList(updatedList);
+    const handleListLeft = async () => {
         navigate("/list");
+
+        if (USE_MOCKS) {
+            const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== currentUser.id) }
+            await updateList(updatedList);
+        } else {
+            const dtoIn = {
+                listId: shoppingList.listId,
+                userId: currentUser.id
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}membership/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     }
 
     const handleLeaveListShow = () => {
@@ -35,7 +60,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
     const listOwner = users.find(user => user.id === ownerId);
 
     // Change list title based on input field value
-    function handleEdited(e) {
+    async function handleEdited(e) {
         e.preventDefault();
         e.stopPropagation();
         setValidated(true);
@@ -45,22 +70,38 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
             return;
         }
 
-        // Check for duplicates before saving
-        const isDuplicate = shoppingLists.some(
-            (list) => list.listId !== shoppingList.listId &&
-                list.title.toLowerCase() === edit.toLowerCase()
-        );
-
-        if (isDuplicate) {
-            return;
-        }
-
         // Update the shopping list with new title
         const updatedList = { ...shoppingList, title: edit };
-        setShoppingList(updatedList);
 
-        setIsEditing(false);
-        setValidated(false);
+        if (USE_MOCKS) {
+            await updateList(updatedList);
+
+            setIsEditing(false);
+            setValidated(false);
+        } else {
+            const dtoIn = {
+                listId: updatedList.listId,
+                title: updatedList.title,
+                archived: updatedList.archived
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setIsEditing(false);
+                setValidated(false);
+                setShoppingList(updatedList);
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     }
 
     return (

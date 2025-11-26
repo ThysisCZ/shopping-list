@@ -2,7 +2,7 @@ import './App.css';
 import UserRoleSelector from './components/UserRoleSelector';
 import { useUserContext } from './context/UserContext';
 import { useShoppingListsContext } from './context/ShoppingListsContext';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Detail from './routes/Detail';
 import ShoppingLists from './routes/ShoppingLists';
 
@@ -28,6 +28,7 @@ function App() {
         </div>
 
         <Routes>
+          <Route path="/" element={<Navigate to="/list" />} />
           <Route path="/list" element={<ShoppingLists />} />
           <Route path="/detail/:id" element={
             <Detail
@@ -37,6 +38,7 @@ function App() {
             />
           }
           />
+          <Route path="*" element={<Navigate to="/list" />} />
         </Routes>
       </BrowserRouter>
     </>

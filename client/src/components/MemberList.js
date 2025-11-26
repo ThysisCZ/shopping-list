@@ -4,23 +4,73 @@ import { mdiAccount, mdiAccountPlus, mdiClose } from '@mdi/js';
 import { useState } from 'react';
 import InviteMemberModal from './InviteMemberModal';
 import DeleteMemberModal from './DeleteMemberModal';
+import { useShoppingListsContext } from '../context/ShoppingListsContext';
+
+const SERVER_URI = process.env.REACT_APP_SERVER_URI;
+const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     const [inviteMemberShow, setInviteMemberShow] = useState(false);
     const [deleteMemberShow, setDeleteMemberShow] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const { updateList } = useShoppingListsContext();
 
-    const handleMembersInvited = (newIds) => {
+    const handleMembersInvited = async (newIds) => {
         // Add new IDs to shopping list member IDs
         const updatedList = { ...shoppingList, memberIds: [...shoppingList.memberIds, ...newIds] }
 
-        setShoppingList(updatedList);
+        if (USE_MOCKS) {
+            await updateList(updatedList);
+        } else {
+            const dtoIn = {
+                listId: shoppingList.listId,
+                userIds: newIds
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}membership/invite`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setShoppingList(updatedList);
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     };
 
-    const handleMemberDeleted = (member) => {
+    const handleMemberDeleted = async (member) => {
         const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== member.id) }
 
-        setShoppingList(updatedList);
+        if (USE_MOCKS) {
+            await updateList(updatedList);
+        } else {
+            const dtoIn = {
+                listId: shoppingList.listId,
+                userId: member.id
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}membership/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setShoppingList(updatedList);
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
+
     };
 
     const handleInviteMemberShow = () => {

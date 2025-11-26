@@ -4,12 +4,17 @@ import Icon from '@mdi/react';
 import { mdiPlus, mdiClose } from '@mdi/js';
 import AddItemModal from './AddItemModal';
 import DeleteItemModal from './DeleteItemModal';
+import { useShoppingListsContext } from '../context/ShoppingListsContext';
+
+const SERVER_URI = process.env.REACT_APP_SERVER_URI;
+const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function ItemList({ shoppingList, setShoppingList }) {
     const [showResolved, setShowResolved] = useState(false);
     const [addItemShow, setAddItemShow] = useState(false);
     const [deleteItemShow, setDeleteItemShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const { updateList } = useShoppingListsContext();
 
     const items = shoppingList.items;
 
@@ -18,24 +23,97 @@ function ItemList({ shoppingList, setShoppingList }) {
         items.filter(item => !item.resolved)
 
     // Update resolved status of an item
-    const handleResolvedStatus = (itemId) => {
+    const handleResolvedStatus = async (itemId) => {
         const updatedItems = items.map(item =>
             item.itemId === itemId ? { ...item, resolved: !item.resolved } : item
         )
 
-        setShoppingList({ ...shoppingList, items: updatedItems });
+        if (USE_MOCKS) {
+            await updateList({ ...shoppingList, items: updatedItems });
+        } else {
+            const dtoIn = {
+                itemId: itemId,
+                resolved: true
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}listItem/update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setShoppingList({ ...shoppingList, items: updatedItems });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     }
 
-    const handleItemAdded = (item) => {
-        setShoppingList({
-            ...shoppingList,
-            items: [...shoppingList.items, item]
-        });
+    const handleItemAdded = async (item) => {
+        if (USE_MOCKS) {
+            await updateList({
+                ...shoppingList,
+                items: [...shoppingList.items, item]
+            });
+        } else {
+            const dtoIn = {
+                listId: shoppingList.listId,
+                name: item.name,
+                quantity: item.quantity,
+                unit: item.unit
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}listItem/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setShoppingList({
+                    ...shoppingList,
+                    items: [...shoppingList.items, item]
+                });
+
+                const dtoOut = await response.json();
+                console.log(dtoIn);
+                console.log(dtoOut);
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     }
 
-    const handleItemDeleted = (item) => {
+    const handleItemDeleted = async (item) => {
         const updatedItems = items.filter(i => i.itemId !== item.itemId);
-        setShoppingList({ ...shoppingList, items: updatedItems });
+
+        if (USE_MOCKS) {
+            await updateList({ ...shoppingList, items: updatedItems });
+        } else {
+            const dtoIn = {
+                itemId: item.itemId
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}listItem/delete`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setShoppingList({ ...shoppingList, items: updatedItems });
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
     }
 
     const handleAddItemShow = () => {
