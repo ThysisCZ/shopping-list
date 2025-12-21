@@ -6,13 +6,19 @@ import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { UserProvider } from './context/UserContext';
 import { ShoppingListsProvider } from './context/ShoppingListsContext';
+import { ModeProvider } from './context/ModeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <UserProvider>
       <ShoppingListsProvider>
-        <App />
+        <ModeProvider>
+          <LanguageProvider>
+            <App />
+          </LanguageProvider>
+        </ModeProvider>
       </ShoppingListsProvider>
     </UserProvider>
   </React.StrictMode>

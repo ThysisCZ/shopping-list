@@ -5,6 +5,8 @@ import Icon from '@mdi/react';
 import { mdiPlus, mdiClose, mdiDelete, mdiArchive, mdiArchiveOff, mdiEye } from '@mdi/js';
 import { useUserContext } from '../context/UserContext';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
+import { useModeContext } from '../context/ModeContext';
+import { useLanguageContext } from '../context/LanguageContext';
 import AddListModal from '../components/AddListModal';
 import DeleteListModal from '../components/DeleteListModal';
 import { ClipLoader } from 'react-spinners';
@@ -28,6 +30,8 @@ function ShoppingLists() {
         showArchived,
         setShowArchived
     } = useShoppingListsContext();
+    const { mode } = useModeContext();
+    const { currentLanguage } = useLanguageContext();
 
     const [addListShow, setAddListShow] = useState(false);
     const [deleteListShow, setDeleteListShow] = useState(false);
@@ -235,151 +239,168 @@ function ShoppingLists() {
     };
 
     return (
-        <Container className="mt-4">
-            <Row className="mb-4">
-                <Col>
-                    <h1>Shopping Lists</h1>
-                </Col>
-            </Row>
-
-            <Row className="mb-3">
-                <Col>
-                    <Form.Check
-                        type="switch"
-                        label="Show archived"
-                        checked={showArchived}
-                        onChange={() => setShowArchived(!showArchived)}
-                    />
-                </Col>
-                <Col xs="auto">
-                    <Button variant="success" onClick={() => setAddListShow(true)}>
-                        <Icon path={mdiPlus} size={0.7} /> Add List
-                    </Button>
-                </Col>
-            </Row>
-
-            <Row>
-                {userListsCall.state === "pending" ?
-                    <div className="d-flex justify-content-center">
-                        <ClipLoader />
-                    </div> :
-                    userLists.map(list => (
-                        <Col key={list.listId} md={6} lg={4} className="mb-4">
-                            <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                                <Card.Header style={{ backgroundColor: "salmon" }}>
-                                    <h5 className="mb-0">{list.title}</h5>
-                                </Card.Header>
-                                <Card.Body style={{ flex: 1, overflowY: 'auto', backgroundColor: "lightsalmon" }}>
-                                    <ListGroup variant="flush">
-                                        {list.items.length > 0 ? (
-                                            list.items.map(item => (
-                                                <ListGroup.Item key={item.itemId} style={{ backgroundColor: "lightsalmon" }}>
-                                                    <Stack direction="horizontal" gap={2}>
-                                                        <Form.Check
-                                                            type="checkbox"
-                                                            checked={item.resolved}
-                                                            onChange={() => handleItemResolved(list.listId, item.itemId)}
-                                                        />
-                                                        <div style={{ flex: 1 }}>
-                                                            <span style={{
-                                                                textDecoration: item.resolved ? 'line-through' : 'none'
-                                                            }}>
-                                                                {item.name}
-                                                            </span>
-                                                            {item.quantity && (
-                                                                <span className="text-muted ms-2">
-                                                                    {item.quantity} {item.unit || ''}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <Button
-                                                            variant="danger"
-                                                            size="sm"
-                                                            onClick={() => handleItemDelete(list.listId, item.itemId)}
-                                                        >
-                                                            <Icon path={mdiClose} size={0.7} />
-                                                        </Button>
-                                                    </Stack>
-                                                </ListGroup.Item>
-                                            ))
-                                        ) : (
-                                            <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
-                                                No items
-                                            </ListGroup.Item>
-                                        )}
-                                    </ListGroup>
-                                </Card.Body>
-                                <Card.Footer style={{ backgroundColor: "salmon" }}>
-                                    <Stack direction="horizontal" gap={2} className="justify-content-end">
-                                        {isOwner(list) && (
-                                            <>
-                                                <Button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedList(list);
-                                                        setDeleteListShow(true);
-                                                    }}
-                                                >
-                                                    <Icon path={mdiDelete} size={0.7} /> Delete
-                                                </Button>
-                                                <Button
-                                                    variant={list.archived ? "secondary" : "warning"}
-                                                    size="sm"
-                                                    onClick={() => handleArchive(list.listId)}
-                                                >
-                                                    {list.archived ? (
-                                                        <>
-                                                            <Icon path={mdiArchiveOff} size={0.7} />
-                                                            <span> Unarchive</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Icon path={mdiArchive} size={0.7} />
-                                                            <span> Archive</span>
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            </>
-                                        )}
-                                        <Button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={() => handleViewDetail(list.listId)}
-                                        >
-                                            <Icon path={mdiEye} size={0.7} /> Detail
-                                        </Button>
-                                    </Stack>
-                                </Card.Footer>
-                            </Card>
-                        </Col>
-                    ))}
-            </Row>
-
-            {userLists.length === 0 && userListsCall.state !== "pending" && (
-                <Row>
-                    <Col className="text-center text-muted mt-4">
-                        <p>No shopping lists found.</p>
+        <div style={{ margin: 30 }}>
+            <Container className="mt-3" style={{ color: mode === "light" ? "black" : "white" }}>
+                <Row className="mb-4">
+                    <Col>
+                        <h1>{currentLanguage.id === "EN" ? "Shopping Lists" : "Nákupní seznamy"}</h1>
                     </Col>
                 </Row>
-            )}
 
-            <AddListModal
-                show={addListShow}
-                setAddListShow={setAddListShow}
-                onListAdd={handleListAdd}
-                shoppingLists={shoppingLists}
-                setShoppingLists={setShoppingLists}
-                currentUser={currentUser}
-            />
+                <Row className="mb-3">
+                    <Col>
+                        <Form.Check
+                            type="switch"
+                            label={currentLanguage.id === "EN" ? "Show archived" : "Zobrazit archivované"}
+                            checked={showArchived}
+                            onChange={() => setShowArchived(!showArchived)}
+                        />
+                    </Col>
+                    <Col xs="auto">
+                        <Button variant="success" onClick={() => setAddListShow(true)}
+                            style={{ display: "flex", alignItems: "center" }}>
+                            <Stack direction="horizontal" gap={1}>
+                                <Icon path={mdiPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Add list" : "Přidat seznam"}
+                            </Stack>
+                        </Button>
+                    </Col>
+                </Row>
 
-            <DeleteListModal
-                show={deleteListShow}
-                setDeleteListShow={setDeleteListShow}
-                onListDelete={handleListDelete}
-                list={selectedList}
-            />
-        </Container>
+                <Row>
+                    {userListsCall.state === "pending" ?
+                        <div className="d-flex justify-content-center">
+                            <ClipLoader color={mode === "light" ? "black" : "white"} />
+                        </div> :
+                        userLists.map(list => (
+                            <Col key={list.listId} md={6} lg={4} className="mb-4">
+                                <Card style={{ height: "100%", display: "flex", flexDirection: "column" }} border={mode === "dark" ? "dark" : ""}>
+                                    <Card.Header style={{ backgroundColor: "salmon" }}>
+                                        <h5 className="mb-0">{list.title}</h5>
+                                    </Card.Header>
+                                    <Card.Body style={{ flex: 1, overflowY: 'auto', backgroundColor: "lightsalmon" }}>
+                                        <ListGroup variant="flush">
+                                            {list.items.length > 0 ? (
+                                                list.items.map(item => (
+                                                    <ListGroup.Item key={item.itemId} style={{ backgroundColor: "lightsalmon" }}>
+                                                        <Stack direction="horizontal" gap={2}>
+                                                            <Form.Check
+                                                                type="checkbox"
+                                                                checked={item.resolved}
+                                                                onChange={() => handleItemResolved(list.listId, item.itemId)}
+                                                            />
+                                                            <div style={{ flex: 1 }}>
+                                                                <span style={{
+                                                                    textDecoration: item.resolved ? 'line-through' : 'none'
+                                                                }}>
+                                                                    {item.name}
+                                                                </span>
+                                                                {item.quantity && (
+                                                                    <span className="text-muted ms-2">
+                                                                        {item.quantity} {item.unit || ''}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <Button
+                                                                variant="danger"
+                                                                size="sm"
+                                                                onClick={() => handleItemDelete(list.listId, item.itemId)}
+                                                                style={{ display: "flex", alignItems: "center", height: 30 }}
+                                                            >
+                                                                <Icon path={mdiClose} size={0.7} />
+                                                            </Button>
+                                                        </Stack>
+                                                    </ListGroup.Item>
+                                                ))
+                                            ) : (
+                                                <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
+                                                    {currentLanguage.id === "EN" ? "No items" : "Žádné položky"}
+                                                </ListGroup.Item>
+                                            )}
+                                        </ListGroup>
+                                    </Card.Body>
+                                    <Card.Footer style={{ backgroundColor: "salmon" }}>
+                                        <Stack direction="horizontal" gap={2} className="justify-content-end">
+                                            {isOwner(list) && (
+                                                <>
+                                                    <Button
+                                                        variant="danger"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedList(list);
+                                                            setDeleteListShow(true);
+                                                        }}
+                                                        style={{ display: "flex", alignItems: "center" }}
+                                                    >
+                                                        <Stack direction="horizontal" gap={1}>
+                                                            <Icon path={mdiDelete} size={0.7} /> {currentLanguage.id === "EN" ? "Delete" : "Smazat"}
+                                                        </Stack>
+                                                    </Button>
+                                                    <Button
+                                                        variant={list.archived ? "secondary" : "warning"}
+                                                        size="sm"
+                                                        onClick={() => handleArchive(list.listId)}
+                                                        style={{ display: "flex", alignItems: "center" }}
+                                                    >
+                                                        <Stack direction="horizontal" gap={1}>
+                                                            {list.archived ? (
+                                                                <>
+                                                                    <Icon path={mdiArchiveOff} size={0.7} />
+                                                                    <span>{currentLanguage.id === "EN" ? " Unarchive" : " Dearchivovat"}</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Icon path={mdiArchive} size={0.7} />
+                                                                    <span>{currentLanguage.id === "EN" ? " Archive" : " Archivovat"}</span>
+                                                                </>
+                                                            )}
+                                                        </Stack>
+                                                    </Button>
+                                                </>
+                                            )}
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={() => handleViewDetail(list.listId)}
+                                                style={{ display: "flex", alignItems: "center" }}
+                                            >
+                                                <Stack direction="horizontal" gap={1}>
+                                                    <Icon path={mdiEye} size={0.7} /> Detail
+                                                </Stack>
+                                            </Button>
+                                        </Stack>
+                                    </Card.Footer>
+                                </Card>
+                            </Col>
+                        ))}
+                </Row>
+
+                {userLists.length === 0 && userListsCall.state !== "pending" && (
+                    <Row>
+                        <Col className="text-center mt-4">
+                            <p style={{ color: mode === "dark" ? "light" : "dark" }}>
+                                {currentLanguage.id === "EN" ? "No shopping lists found." : "Nejsou tu žádné seznamy."}
+                            </p>
+                        </Col>
+                    </Row>
+                )}
+
+                <AddListModal
+                    show={addListShow}
+                    setAddListShow={setAddListShow}
+                    onListAdd={handleListAdd}
+                    shoppingLists={shoppingLists}
+                    setShoppingLists={setShoppingLists}
+                    currentUser={currentUser}
+                />
+
+                <DeleteListModal
+                    show={deleteListShow}
+                    setDeleteListShow={setDeleteListShow}
+                    onListDelete={handleListDelete}
+                    list={selectedList}
+                />
+            </Container>
+        </div >
     )
 }
 

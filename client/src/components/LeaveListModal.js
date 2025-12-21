@@ -1,6 +1,8 @@
 import { Modal, Form, Button } from 'react-bootstrap';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function LeaveListModal({ show, setLeaveListShow, onListLeave, list }) {
+    const { currentLanguage } = useLanguageContext();
 
     const handleClose = () => {
         setLeaveListShow(false);
@@ -19,17 +21,17 @@ function LeaveListModal({ show, setLeaveListShow, onListLeave, list }) {
         <Modal show={show} onHide={handleClose} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Leave List ({list?.title})?</Modal.Title>
+                    <Modal.Title>{currentLanguage.id === "EN" ? "Leave List" : "Opustit seznam"} ({list?.title})?</Modal.Title>
                 </Modal.Header>
                 <Modal.Footer>
                     <div className="d-flex justify-content-between">
                         <div></div>
                         <div>
                             <Button variant="secondary" onClick={handleClose} className="me-2">
-                                Cancel
+                                {currentLanguage.id === "EN" ? "Cancel" : "Zrušit"}
                             </Button>
                             <Button variant="danger" type="submit">
-                                Leave
+                                {currentLanguage.id === "EN" ? "Leave" : "Opustit"}
                             </Button>
                         </div>
                     </div>

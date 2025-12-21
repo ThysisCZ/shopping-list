@@ -1,5 +1,6 @@
 import { Modal, Form, Button } from 'react-bootstrap';
 import { useState } from 'react';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentUser }) {
     const defaultForm = {
@@ -13,6 +14,7 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
 
     const [validated, setValidated] = useState(false);
     const [formData, setFormData] = useState(defaultForm);
+    const { currentLanguage } = useLanguageContext();
 
     const handleClose = () => {
         setAddListShow(false);
@@ -48,12 +50,12 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
         <Modal show={show} onHide={handleClose} centered>
             <Form noValidate validated={validated} onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add Shopping List</Modal.Title>
+                    <Modal.Title>{currentLanguage.id === "EN" ? "Add Shopping List" : "Přidat nákupní seznam"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form.Group className="mb-3">
                         <Form.Label>
-                            Title
+                            {currentLanguage.id === "EN" ? "Title" : "Název"}
                             <span style={{ color: "red" }}> *</span>
                         </Form.Label>
                         <Form.Control
@@ -74,9 +76,9 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                             }
                         />
                         <Form.Control.Feedback type="invalid">
-                            {validated && formData.title.length === 0 && "This field is required."}
+                            {validated && formData.title.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                             {validated && shoppingLists.some((list) => list.title.toLowerCase() === formData.title.toLowerCase())
-                                && "A list with this title already exists."}
+                                && (currentLanguage.id === "EN" ? "This list already exists." : "Tento seznam již existuje.")}
                         </Form.Control.Feedback>
                     </Form.Group>
                 </Modal.Body>
@@ -85,10 +87,10 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                         <div></div>
                         <div>
                             <Button variant="secondary" onClick={handleClose} className="me-2">
-                                Cancel
+                                {currentLanguage.id === "EN" ? "Cancel" : "Zrušit"}
                             </Button>
                             <Button variant="primary" type="submit">
-                                Add
+                                {currentLanguage.id === "EN" ? "Add" : "Přidat"}
                             </Button>
                         </div>
                     </div>

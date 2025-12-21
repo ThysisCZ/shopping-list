@@ -1,5 +1,6 @@
 import { Modal, Form, Col, Row, Button } from 'react-bootstrap';
 import { useState } from 'react';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
     const defaultForm = {
@@ -12,6 +13,7 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
 
     const [validated, setValidated] = useState(false);
     const [formData, setFormData] = useState(defaultForm);
+    const { currentLanguage } = useLanguageContext();
 
     const handleClose = () => {
         setAddItemShow(false)
@@ -41,12 +43,12 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
         <Modal show={show} onHide={handleClose} centered>
             <Form noValidate validated={validated} onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add Item</Modal.Title>
+                    <Modal.Title>{currentLanguage.id === "EN" ? "Add Item" : "Přidat položku"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form.Group className="mb-3">
                         <Form.Label>
-                            Name
+                            {currentLanguage.id === "EN" ? "Name" : "Název"}
                             <span style={{ color: "red" }}> *</span>
                         </Form.Label>
                         <Form.Control
@@ -67,15 +69,15 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
                             }
                         />
                         <Form.Control.Feedback type="invalid">
-                            {validated && formData.name.length === 0 && "This field is required."}
+                            {validated && formData.name.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                             {validated && items.find((item) => item.name.toLowerCase() === formData.name.toLowerCase())
-                                && "This item already exists."}
+                                && (currentLanguage.id === "EN" ? "This item already exists." : "Tato položka již existuje.")}
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Row>
                         <Form.Group as={Col} className="mb-3">
                             <Form.Label>
-                                Quantity
+                                {currentLanguage.id === "EN" ? "Quantity" : "Množství"}
                                 <span style={{ color: "red" }}> *</span>
                             </Form.Label>
                             <Form.Control
@@ -106,9 +108,11 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
                                 }
                             />
                             <Form.Control.Feedback type="invalid">
-                                {validated && (formData.quantity === "" || isNaN(formData.quantity)) && "This field is required."}
+                                {validated && (formData.quantity === "" || isNaN(formData.quantity)) &&
+                                    (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                 {validated && (parseFloat(formData.quantity) < 0.1 ||
-                                    parseFloat(formData.quantity).toString().length > 7) && "Input a valid number."}
+                                    parseFloat(formData.quantity).toString().length > 7) &&
+                                    (currentLanguage.id === "EN" ? "Input a valid number." : "Zadejte validní číslo.")}
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group as={Col} className="mb-3">
@@ -145,10 +149,10 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
                         <div></div>
                         <div>
                             <Button variant="secondary" onClick={handleClose} className="me-2">
-                                Cancel
+                                {currentLanguage.id === "EN" ? "Cancel" : "Zrušit"}
                             </Button>
                             <Button variant="primary" type="submit">
-                                Add
+                                {currentLanguage.id === "EN" ? "Add" : "Přidat"}
                             </Button>
                         </div>
                     </div>

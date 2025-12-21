@@ -95,5 +95,15 @@
             "id": "5",
             "name": "Layla"
         }
+    ],
+    "languages": [
+        {
+            "id": "EN",
+            "name": "English"
+        },
+        {
+            "id": "CZ",
+            "name": "Čeština"
+        }
     ]
 }

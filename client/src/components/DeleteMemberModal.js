@@ -1,6 +1,8 @@
 import { Modal, Form, Button } from 'react-bootstrap';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function DeleteMemberModal({ show, setDeleteMemberShow, onMemberDelete, user }) {
+    const { currentLanguage } = useLanguageContext();
 
     const handleClose = () => {
         setDeleteMemberShow(false);
@@ -19,17 +21,17 @@ function DeleteMemberModal({ show, setDeleteMemberShow, onMemberDelete, user }) 
         <Modal show={show} onHide={handleClose} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Delete Member ({user?.name})?</Modal.Title>
+                    <Modal.Title>{currentLanguage.id === "EN" ? "Delete Member" : "Smazat člena"} ({user?.name})?</Modal.Title>
                 </Modal.Header>
                 <Modal.Footer>
                     <div className="d-flex justify-content-between">
                         <div></div>
                         <div>
                             <Button variant="secondary" onClick={handleClose} className="me-2">
-                                Cancel
+                                {currentLanguage.id === "EN" ? "Cancel" : "Zrušit"}
                             </Button>
                             <Button variant="danger" type="submit">
-                                Delete
+                                {currentLanguage.id === "EN" ? "Delete" : "Smazat"}
                             </Button>
                         </div>
                     </div>

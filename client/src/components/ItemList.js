@@ -5,6 +5,7 @@ import { mdiPlus, mdiClose } from '@mdi/js';
 import AddItemModal from './AddItemModal';
 import DeleteItemModal from './DeleteItemModal';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
+import { useLanguageContext } from '../context/LanguageContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -15,6 +16,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     const [deleteItemShow, setDeleteItemShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const { updateList } = useShoppingListsContext();
+    const { currentLanguage } = useLanguageContext();
 
     const items = shoppingList.items;
 
@@ -132,22 +134,31 @@ function ItemList({ shoppingList, setShoppingList }) {
                     <Container>
                         <Row style={{ marginBottom: 10 }}>
                             <Col>
-                                <Form.Check
-                                    type="switch"
-                                    label="Show resolved"
-                                    checked={showResolved}
-                                    onChange={() => setShowResolved(!showResolved)}
-                                />
+                                <div>
+                                    <div>
+                                        <Form.Check
+                                            type="switch"
+                                            checked={showResolved}
+                                            onChange={() => setShowResolved(!showResolved)}
+                                        />
+                                    </div>
+                                    <small className="text-muted">
+                                        {currentLanguage.id === "EN" ? "Show resolved" : "Zobrazit vyřešené"}
+                                    </small>
+                                </div>
                             </Col>
                             <Col xs="auto">
-                                <Button variant="success" size="sm" onClick={handleAddItemShow}>
-                                    <Icon path={mdiPlus} size={0.7} /> Add
+                                <Button variant="success" size="sm" onClick={handleAddItemShow}
+                                    style={{ display: "flex", alignItems: "center" }}>
+                                    <Stack direction="horizontal" gap={1}>
+                                        <Icon path={mdiPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Add" : "Přidat"}
+                                    </Stack>
                                 </Button>
                             </Col>
                         </Row>
                         <Row>
                             <Col>
-                                <h5 className="mb-0">Items</h5>
+                                <h5 className="mb-0">{currentLanguage.id === "EN" ? "Items" : "Položky"}</h5>
                             </Col>
                         </Row>
                     </Container>
@@ -156,22 +167,24 @@ function ItemList({ shoppingList, setShoppingList }) {
                     <Accordion.Header className="Accordion-header" />
                     <Accordion.Body>
                         <ListGroup variant="flush">
-                            {filteredItems.map(item => (
+                            {filteredItems.length > 0 ? filteredItems.map(item => (
                                 <ListGroup.Item key={item.itemId} style={{ backgroundColor: 'lightsalmon' }}>
-                                    <Container>
+                                    <Container style={{ minWidth: 250 }}>
                                         <Row>
                                             <Col>
-                                                <Stack direction="horizontal" gap={3}>
+                                                <Stack>
                                                     <Form.Check
                                                         type="checkbox"
                                                         checked={item.resolved}
                                                         onChange={() => handleResolvedStatus(item.itemId)}
                                                     />
-                                                    <b style={{
-                                                        textDecoration: item.resolved ? 'line-through' : 'none'
-                                                    }}>
-                                                        {item.name}
-                                                    </b>
+                                                    <div>
+                                                        <b style={{
+                                                            textDecoration: item.resolved ? 'line-through' : 'none'
+                                                        }}>
+                                                            {item.name}
+                                                        </b>
+                                                    </div>
                                                     {item.quantity && (
                                                         <div>
                                                             {item.quantity} {item.unit}
@@ -181,17 +194,23 @@ function ItemList({ shoppingList, setShoppingList }) {
                                             </Col>
                                             <Col xs="auto">
                                                 <Button
+                                                    className="Item-delete-button"
                                                     variant="danger"
                                                     size="sm"
                                                     onClick={() => handleDeleteItemShow(item)}
+                                                    style={{ display: "flex", alignItems: "center", height: 30 }}
                                                 >
                                                     <Icon path={mdiClose} size={0.7} />
                                                 </Button>
                                             </Col>
                                         </Row>
                                     </Container>
+                                </ListGroup.Item>)
+                            ) : (
+                                <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
+                                    {currentLanguage.id === "EN" ? "No items" : "Žádné položky"}
                                 </ListGroup.Item>
-                            ))}
+                            )}
                         </ListGroup>
                     </Accordion.Body>
                 </Accordion>

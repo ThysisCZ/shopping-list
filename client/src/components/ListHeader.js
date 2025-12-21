@@ -5,6 +5,7 @@ import { mdiPencil, mdiCheck, mdiCancel } from '@mdi/js';
 import LeaveListModal from './LeaveListModal';
 import { useNavigate } from 'react-router-dom';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
+import { useLanguageContext } from '../context/LanguageContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -16,6 +17,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
     const [validated, setValidated] = useState(false);
     const navigate = useNavigate();
     const { updateList } = useShoppingListsContext();
+    const { currentLanguage } = useLanguageContext();
 
     // Sync edit state when shopping list title changes
     useEffect(() => {
@@ -142,11 +144,11 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                     }
                                                 />
                                                 <Form.Control.Feedback type="invalid">
-                                                    {validated && edit.length === 0 && "This field is required."}
+                                                    {validated && edit.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                                     {validated && shoppingLists.some(
                                                         (list) => list.listId !== shoppingList.listId &&
                                                             list.title.toLowerCase() === edit.toLowerCase()
-                                                    ) && "A list with this title already exists."}
+                                                    ) && (currentLanguage.id === "EN" ? "This list already exists." : "Tento seznam již existuje.")}
                                                 </Form.Control.Feedback>
                                             </Form.Group>
                                         ) : (
@@ -158,7 +160,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                     variant="secondary"
                                                     size="sm"
                                                     onClick={() => setIsEditing(true)}
-                                                    style={{ marginTop: 5 }}
+                                                    style={{ marginTop: 5, display: "flex", alignItems: "center", height: 30 }}
                                                 >
                                                     <Icon path={mdiPencil} size={0.7}></Icon>
                                                 </Button>
@@ -168,7 +170,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                         variant="success"
                                                         size="sm"
                                                         type="submit"
-                                                        style={{ marginTop: 5 }}
+                                                        style={{ marginTop: 5, display: "flex", alignItems: "center", height: 30 }}
                                                     >
                                                         <Icon path={mdiCheck} size={0.7}></Icon>
                                                     </Button>
@@ -177,10 +179,10 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                         size="sm"
                                                         onClick={() => {
                                                             setIsEditing(false);
-                                                            setEdit(shoppingList.title); // Reset to original title
+                                                            setEdit(shoppingList.title);
                                                             setValidated(false);
                                                         }}
-                                                        style={{ marginTop: 5 }}
+                                                        style={{ marginTop: 5, display: "flex", alignItems: "center", height: 30 }}
                                                     >
                                                         <Icon path={mdiCancel} size={0.7}></Icon>
                                                     </Button>
@@ -189,7 +191,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                         )}
                                     </Stack>
                                 </Form>
-                                <small className="text-muted">Owner: {listOwner.name}</small>
+                                <small className="text-muted">{currentLanguage.id === "EN" ? "Owner" : "Vlastník"}: {listOwner.name}</small>
                             </Col>
                             {currentUser.id !== ownerId && (
                                 <Col xs="auto">
@@ -197,7 +199,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                         variant="danger"
                                         onClick={handleLeaveListShow}
                                     >
-                                        Leave
+                                        {currentLanguage.id === "EN" ? "Leave" : "Opustit"}
                                     </Button>
                                 </Col>
                             )}

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import InviteMemberModal from './InviteMemberModal';
 import DeleteMemberModal from './DeleteMemberModal';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
+import { useLanguageContext } from '../context/LanguageContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -14,6 +15,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     const [deleteMemberShow, setDeleteMemberShow] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const { updateList } = useShoppingListsContext();
+    const { currentLanguage } = useLanguageContext();
 
     const handleMembersInvited = async (newIds) => {
         // Add new IDs to shopping list member IDs
@@ -89,7 +91,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                     <Container>
                         <Row>
                             <Col>
-                                <h5 className="mb-0">Members</h5>
+                                <h5 className="mb-0">{currentLanguage.id === "EN" ? "Members" : "Členové"}</h5>
                             </Col>
                             <Col xs="auto">
                                 {currentUser.id === shoppingList.ownerId && (
@@ -97,8 +99,11 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                                         variant="primary"
                                         size="sm"
                                         onClick={handleInviteMemberShow}
+                                        style={{ display: "flex", alignItems: "center" }}
                                     >
-                                        <Icon path={mdiAccountPlus} size={0.7} /> Invite
+                                        <Stack direction="horizontal" gap={1}>
+                                            <Icon path={mdiAccountPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Invite" : "Pozvat"}
+                                        </Stack>
                                     </Button>
                                 )}
                             </Col>
@@ -119,7 +124,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                                                         <Icon path={mdiAccount} size={0.8} />
                                                         <b>{user.name}</b>
                                                         {user.id === shoppingList.ownerId && (
-                                                            <Badge bg="primary">Owner</Badge>
+                                                            <Badge bg="primary">{currentLanguage.id === "EN" ? "Owner" : "Vlastník"}</Badge>
                                                         )}
                                                     </Stack>
                                                 </Col>
@@ -129,6 +134,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                                                             variant="danger"
                                                             size="sm"
                                                             onClick={() => handleDeleteMemberShow(user)}
+                                                            style={{ display: "flex", alignItems: "center", height: 30 }}
                                                         >
                                                             <Icon path={mdiClose} size={0.7} />
                                                         </Button>
@@ -142,7 +148,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                         </ListGroup>
                     </Accordion.Body>
                 </Accordion>
-            </Card>
+            </Card >
 
             <InviteMemberModal
                 show={inviteMemberShow}

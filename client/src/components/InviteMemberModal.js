@@ -2,9 +2,11 @@ import { Modal, Form, Col, Row, Button, ListGroup, Container, Stack } from 'reac
 import Icon from '@mdi/react';
 import { mdiAccount } from '@mdi/js';
 import { useState } from 'react';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, list }) {
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const { currentLanguage } = useLanguageContext();
 
     const handleClose = () => {
         setSelectedUsers([]);
@@ -41,11 +43,11 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
         <Modal show={show} onHide={handleClose} centered>
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Invite Members</Modal.Title>
+                    <Modal.Title>{currentLanguage.id === "EN" ? "Invite Members" : "Pozvat členy"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {availableUsers.length === 0 ? (
-                        <p className="text-center text-muted">No users to invite.</p>
+                        <p className="text-center text-muted">{currentLanguage.id === "EN" ? "No users to invite." : "Žádní uživatelé k pozvání."}</p>
                     ) : (
                         <ListGroup variant="flush">
                             {availableUsers.map(user => {
@@ -79,14 +81,14 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
                         <div></div>
                         <div>
                             <Button variant="secondary" onClick={handleClose} className="me-2">
-                                Cancel
+                                {currentLanguage.id === "EN" ? "Cancel" : "Zrušit"}
                             </Button>
                             <Button
                                 variant="primary"
                                 type="submit"
                                 disabled={selectedUsers.length === 0}
                             >
-                                Invite ({selectedUsers.length})
+                                {currentLanguage.id === "EN" ? "Invite" : "Pozvat"} ({selectedUsers.length})
                             </Button>
                         </div>
                     </div>

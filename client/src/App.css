@@ -1,16 +1,61 @@
-.Role-container {
+.Top-panel-container {
     margin: 20px;
     display: flex;
     justify-content: space-between;
 }
 
+.User-container {
+    margin-top: 8px;
+    margin-left: 26px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.Settings-container {
+    max-width: 450px;
+    display: flex;
+    gap: 20px;
+    margin-right: 26px;
+}
+
+.Settings {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
 .Shopping-list-container {
     max-width: 1200px;
-    margin: 30px auto;
+    margin: 30px;
     padding: 20px;
 }
 
 .Accordion-header {
     --bs-accordion-btn-bg: beige;
     --bs-accordion-active-bg: beige;
+}
+
+.Show-resolved {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .Top-panel-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .Settings-container {
+        margin-left: 26px;
+    }
+}
+
+@media (max-width: 450px) {
+    .Item-delete-button {
+        margin-right: 50px;
+    }
 }

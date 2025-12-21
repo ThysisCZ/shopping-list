@@ -3,13 +3,22 @@ import ListHeader from '../components/ListHeader';
 import MemberList from '../components/MemberList';
 import ItemList from '../components/ItemList';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
+import { useModeContext } from '../context/ModeContext';
+import { useLanguageContext } from '../context/LanguageContext';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Stack } from 'react-bootstrap';
+import Icon from '@mdi/react';
+import { mdiArrowLeft } from '@mdi/js';
 
 function Detail({ currentUser, users, shoppingLists }) {
     const { id } = useParams();
     const { getListById } = useShoppingListsContext();
+    const { mode } = useModeContext();
+    const { currentLanguage } = useLanguageContext();
     const [shoppingList, setShoppingList] = useState(null);
     const [shoppingListCall, setShoppingListCall] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const load = async () => {
@@ -34,9 +43,9 @@ function Detail({ currentUser, users, shoppingLists }) {
 
     if (shoppingListCall?.state === "error") {
         return (
-            <div>
-                <h1 style={{ textAlign: 'center', fontWeight: 'bold' }}>404 - Not Found</h1>
-                <h3 style={{ textAlign: 'center' }}>Shopping list not found.</h3>
+            <div style={{ color: mode === "light" ? "black" : "white" }}>
+                <h1 style={{ textAlign: 'center', fontWeight: 'bold' }}>{currentLanguage.id === "EN" ? "404 - Not Found" : "404 - Nenalezeno"}</h1>
+                <h3 style={{ textAlign: 'center' }}>{currentLanguage.id === "EN" ? "Shopping list not found." : "Seznam nebyl nalezen."}</h3>
             </div>
         );
     }
@@ -44,16 +53,20 @@ function Detail({ currentUser, users, shoppingLists }) {
     const isAuthorized = shoppingList && shoppingList.memberIds.includes(currentUser.id);
 
     return (
-        <div>
+        <div style={{ marginLeft: 15, marginRight: 15 }}>
             {isAuthorized ? (
                 <>
+                    <Button style={{ marginLeft: 30, display: "flex", alignItems: "center" }} onClick={() => navigate("/list")}>
+                        <Stack direction="horizontal" gap={1}>
+                            <Icon path={mdiArrowLeft} size={1} /> {currentLanguage.id === "EN" ? "Back" : "Zpět"}
+                        </Stack>
+                    </Button>
                     <ListHeader
                         currentUser={currentUser}
                         users={users}
                         shoppingList={shoppingList}
                         setShoppingList={setShoppingList}
                         shoppingLists={shoppingLists}
-
                     />
                     <MemberList
                         currentUser={currentUser}
@@ -67,10 +80,10 @@ function Detail({ currentUser, users, shoppingLists }) {
                     />
                 </>
             ) : (
-                shoppingListCall?.state === "error" && <>
-                    <h1 style={{ textAlign: 'center', fontWeight: 'bold' }}>401 - Unauthorized</h1>
-                    <h3 style={{ textAlign: 'center' }}>You don't have permission to view this list.</h3>
-                </>
+                shoppingListCall?.state !== "pending" && <div style={{ color: mode === "light" ? "black" : "white" }}>
+                    <h1 style={{ textAlign: 'center', fontWeight: 'bold' }}>{currentLanguage.id === "EN" ? "401 - Unauthorized" : "401 - Neautorizováno"}</h1>
+                    <h3 style={{ textAlign: 'center' }}>{currentLanguage.id === "EN" ? "You don't have permission to view this list." : "K zobrazení tohoto seznamu nemáte dostatečné oprávnění."}</h3>
+                </div>
             )}
         </div>
     )
