@@ -87,7 +87,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     return (
         <>
             <Card className="Shopping-list-container" style={{ backgroundColor: 'salmon' }}>
-                <Card.Header style={{ backgroundColor: 'darksalmon' }}>
+                <Card.Header style={{ backgroundColor: 'bisque' }}>
                     <Container>
                         <Row>
                             <Col>
@@ -111,42 +111,44 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                     </Container>
                 </Card.Header>
                 <Accordion style={{ backgroundColor: 'lightsalmon' }}>
-                    <Accordion.Header className="Accordion-header" />
-                    <Accordion.Body>
-                        <ListGroup variant="flush" >
-                            {users.map(user => (
-                                shoppingList.memberIds.includes(user.id) && (
-                                    <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
-                                        <Container>
-                                            <Row>
-                                                <Col>
-                                                    <Stack direction="horizontal" gap={3}>
-                                                        <Icon path={mdiAccount} size={0.8} />
-                                                        <b>{user.name}</b>
-                                                        {user.id === shoppingList.ownerId && (
-                                                            <Badge bg="primary">{currentLanguage.id === "EN" ? "Owner" : "Vlastník"}</Badge>
+                    <Accordion.Item style={{ backgroundColor: "lightsalmon" }}>
+                        <Accordion.Header className="Accordion-header" />
+                        <Accordion.Body>
+                            <ListGroup variant="flush" >
+                                {users.map(user => (
+                                    shoppingList.memberIds.includes(user.id) && (
+                                        <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
+                                            <Container>
+                                                <Row>
+                                                    <Col>
+                                                        <Stack direction="horizontal" gap={3}>
+                                                            <Icon path={mdiAccount} size={0.8} />
+                                                            <b>{user.name}</b>
+                                                            {user.id === shoppingList.ownerId && (
+                                                                <Badge bg="primary">{currentLanguage.id === "EN" ? "Owner" : "Vlastník"}</Badge>
+                                                            )}
+                                                        </Stack>
+                                                    </Col>
+                                                    <Col xs="auto">
+                                                        {currentUser.id === shoppingList.ownerId && user.id !== shoppingList.ownerId && (
+                                                            <Button
+                                                                variant="danger"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteMemberShow(user)}
+                                                                style={{ display: "flex", alignItems: "center", height: 30 }}
+                                                            >
+                                                                <Icon path={mdiClose} size={0.7} />
+                                                            </Button>
                                                         )}
-                                                    </Stack>
-                                                </Col>
-                                                <Col xs="auto">
-                                                    {currentUser.id === shoppingList.ownerId && user.id !== shoppingList.ownerId && (
-                                                        <Button
-                                                            variant="danger"
-                                                            size="sm"
-                                                            onClick={() => handleDeleteMemberShow(user)}
-                                                            style={{ display: "flex", alignItems: "center", height: 30 }}
-                                                        >
-                                                            <Icon path={mdiClose} size={0.7} />
-                                                        </Button>
-                                                    )}
-                                                </Col>
-                                            </Row>
-                                        </Container>
-                                    </ListGroup.Item>
-                                )
-                            ))}
-                        </ListGroup>
-                    </Accordion.Body>
+                                                    </Col>
+                                                </Row>
+                                            </Container>
+                                        </ListGroup.Item>
+                                    )
+                                ))}
+                            </ListGroup>
+                        </Accordion.Body>
+                    </Accordion.Item>
                 </Accordion>
             </Card >
 

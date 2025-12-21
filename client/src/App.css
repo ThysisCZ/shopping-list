@@ -34,13 +34,25 @@
 }
 
 .Accordion-header {
-    --bs-accordion-btn-bg: beige;
-    --bs-accordion-active-bg: beige;
+    --bs-accordion-btn-bg: #E9967A;
+    --bs-accordion-active-bg: #E9967A;
 }
 
 .Show-resolved {
     display: flex;
     flex-direction: column;
+}
+
+.Lists-stats {
+    width: 100%;
+    aspect-ratio: 1.618;
+    max-width: 850px;
+    margin: auto;
+}
+
+.Pie-chart-text {
+    font-size: 20px;
+    font-weight: bold;
 }
 
 @media (max-width: 768px) {
@@ -51,6 +63,16 @@
 
     .Settings-container {
         margin-left: 26px;
+    }
+}
+
+@media (max-width: 576px) {
+    .Lists-stats {
+        height: 400px
+    }
+
+    .Pie-chart-text {
+        font-size: 13px;
     }
 }
 

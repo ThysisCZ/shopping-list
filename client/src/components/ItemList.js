@@ -130,7 +130,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     return (
         <>
             <Card className="Shopping-list-container" style={{ backgroundColor: 'salmon' }}>
-                <Card.Header style={{ backgroundColor: 'darksalmon' }}>
+                <Card.Header style={{ backgroundColor: 'bisque' }}>
                     <Container>
                         <Row style={{ marginBottom: 10 }}>
                             <Col>
@@ -164,55 +164,57 @@ function ItemList({ shoppingList, setShoppingList }) {
                     </Container>
                 </Card.Header>
                 <Accordion style={{ backgroundColor: 'lightsalmon' }}>
-                    <Accordion.Header className="Accordion-header" />
-                    <Accordion.Body>
-                        <ListGroup variant="flush">
-                            {filteredItems.length > 0 ? filteredItems.map(item => (
-                                <ListGroup.Item key={item.itemId} style={{ backgroundColor: 'lightsalmon' }}>
-                                    <Container style={{ minWidth: 250 }}>
-                                        <Row>
-                                            <Col>
-                                                <Stack>
-                                                    <Form.Check
-                                                        type="checkbox"
-                                                        checked={item.resolved}
-                                                        onChange={() => handleResolvedStatus(item.itemId)}
-                                                    />
-                                                    <div>
-                                                        <b style={{
-                                                            textDecoration: item.resolved ? 'line-through' : 'none'
-                                                        }}>
-                                                            {item.name}
-                                                        </b>
-                                                    </div>
-                                                    {item.quantity && (
+                    <Accordion.Item style={{ backgroundColor: "lightsalmon" }}>
+                        <Accordion.Header className="Accordion-header" />
+                        <Accordion.Body>
+                            <ListGroup variant="flush">
+                                {filteredItems.length > 0 ? filteredItems.map(item => (
+                                    <ListGroup.Item key={item.itemId} style={{ backgroundColor: 'lightsalmon' }}>
+                                        <Container style={{ minWidth: 250 }}>
+                                            <Row>
+                                                <Col>
+                                                    <Stack>
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={item.resolved}
+                                                            onChange={() => handleResolvedStatus(item.itemId)}
+                                                        />
                                                         <div>
-                                                            {item.quantity} {item.unit}
+                                                            <b style={{
+                                                                textDecoration: item.resolved ? 'line-through' : 'none'
+                                                            }}>
+                                                                {item.name}
+                                                            </b>
                                                         </div>
-                                                    )}
-                                                </Stack>
-                                            </Col>
-                                            <Col xs="auto">
-                                                <Button
-                                                    className="Item-delete-button"
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteItemShow(item)}
-                                                    style={{ display: "flex", alignItems: "center", height: 30 }}
-                                                >
-                                                    <Icon path={mdiClose} size={0.7} />
-                                                </Button>
-                                            </Col>
-                                        </Row>
-                                    </Container>
-                                </ListGroup.Item>)
-                            ) : (
-                                <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
-                                    {currentLanguage.id === "EN" ? "No items" : "Žádné položky"}
-                                </ListGroup.Item>
-                            )}
-                        </ListGroup>
-                    </Accordion.Body>
+                                                        {item.quantity && (
+                                                            <div>
+                                                                {item.quantity} {item.unit}
+                                                            </div>
+                                                        )}
+                                                    </Stack>
+                                                </Col>
+                                                <Col xs="auto">
+                                                    <Button
+                                                        className="Item-delete-button"
+                                                        variant="danger"
+                                                        size="sm"
+                                                        onClick={() => handleDeleteItemShow(item)}
+                                                        style={{ display: "flex", alignItems: "center", height: 30 }}
+                                                    >
+                                                        <Icon path={mdiClose} size={0.7} />
+                                                    </Button>
+                                                </Col>
+                                            </Row>
+                                        </Container>
+                                    </ListGroup.Item>)
+                                ) : (
+                                    <ListGroup.Item className="text-muted text-center" style={{ backgroundColor: "lightsalmon" }}>
+                                        {currentLanguage.id === "EN" ? "No items" : "Žádné položky"}
+                                    </ListGroup.Item>
+                                )}
+                            </ListGroup>
+                        </Accordion.Body>
+                    </Accordion.Item>
                 </Accordion>
             </Card>
 

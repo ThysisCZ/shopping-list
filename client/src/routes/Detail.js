@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import ListHeader from '../components/ListHeader';
 import MemberList from '../components/MemberList';
 import ItemList from '../components/ItemList';
+import ResolvedStateChart from '../components/ResolvedStateChart';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useModeContext } from '../context/ModeContext';
 import { useLanguageContext } from '../context/LanguageContext';
@@ -77,6 +78,9 @@ function Detail({ currentUser, users, shoppingLists }) {
                     <ItemList
                         shoppingList={shoppingList}
                         setShoppingList={setShoppingList}
+                    />
+                    <ResolvedStateChart
+                        shoppingList={shoppingList}
                     />
                 </>
             ) : (
