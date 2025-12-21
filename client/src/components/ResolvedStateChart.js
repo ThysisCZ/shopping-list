@@ -1,5 +1,4 @@
 import { Cell, Pie, PieChart } from 'recharts';
-import { Row, Col } from 'react-bootstrap';
 import { useLanguageContext } from '../context/LanguageContext';
 import { useModeContext } from '../context/ModeContext';
 
