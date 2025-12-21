@@ -345,12 +345,12 @@ function ShoppingLists() {
                                                             {list.archived ? (
                                                                 <>
                                                                     <Icon path={mdiArchiveOff} size={0.7} />
-                                                                    <span>{currentLanguage.id === "EN" ? " Unarchive" : " Dearchivovat"}</span>
+                                                                    <span>{currentLanguage.id === "EN" ? " Unarchive" : " Obnovit"}</span>
                                                                 </>
                                                             ) : (
                                                                 <>
                                                                     <Icon path={mdiArchive} size={0.7} />
-                                                                    <span>{currentLanguage.id === "EN" ? " Archive" : " Archivovat"}</span>
+                                                                    <span>{currentLanguage.id === "EN" ? " Archive" : " Uložit"}</span>
                                                                 </>
                                                             )}
                                                         </Stack>
