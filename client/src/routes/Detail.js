@@ -51,7 +51,7 @@ function Detail({ currentUser, users, shoppingLists }) {
         );
     }
 
-    const isAuthorized = shoppingList && shoppingList.memberIds.includes(currentUser.id);
+    const isAuthorized = shoppingList && shoppingList.memberIds?.includes(currentUser.id);
 
     return (
         <div style={{ marginLeft: 15, marginRight: 15 }}>

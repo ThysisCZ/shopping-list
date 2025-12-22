@@ -15,7 +15,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     const [addItemShow, setAddItemShow] = useState(false);
     const [deleteItemShow, setDeleteItemShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const { updateList } = useShoppingListsContext();
+    const { updateList, getListById } = useShoppingListsContext();
     const { currentLanguage } = useLanguageContext();
 
     const items = shoppingList.items;
@@ -30,12 +30,14 @@ function ItemList({ shoppingList, setShoppingList }) {
             item.itemId === itemId ? { ...item, resolved: !item.resolved } : item
         )
 
+        const updatedItem = updatedItems.find(item => item.itemId === itemId);
+
         if (USE_MOCKS) {
             await updateList({ ...shoppingList, items: updatedItems });
         } else {
             const dtoIn = {
                 itemId: itemId,
-                resolved: true
+                resolved: updatedItem.resolved
             }
 
             try {
@@ -61,6 +63,9 @@ function ItemList({ shoppingList, setShoppingList }) {
                 ...shoppingList,
                 items: [...shoppingList.items, item]
             });
+
+            const refreshed = await getListById(shoppingList.listId);
+            setShoppingList(refreshed);
         } else {
             const dtoIn = {
                 listId: shoppingList.listId,
@@ -81,9 +86,10 @@ function ItemList({ shoppingList, setShoppingList }) {
                     items: [...shoppingList.items, item]
                 });
 
+                const refreshed = await getListById(shoppingList.listId);
+                setShoppingList(refreshed);
+
                 const dtoOut = await response.json();
-                console.log(dtoIn);
-                console.log(dtoOut);
                 return dtoOut;
             } catch (e) {
                 console.error("Error: ", e.message);
@@ -188,7 +194,13 @@ function ItemList({ shoppingList, setShoppingList }) {
                                                         </div>
                                                         {item.quantity && (
                                                             <div>
-                                                                {item.quantity} {item.unit}
+                                                                {item.quantity} {currentLanguage.id === "CZ" &&
+                                                                    ((item.unit === "tsp" && "ČL") ||
+                                                                        (item.unit === "tbsp" && "PL") ||
+                                                                        (item.unit === "pc" && "ks") ||
+                                                                        (item.unit === "c" && "hrn.") || item.unit)
+                                                                }
+                                                                {currentLanguage.id === "EN" && item.unit}
                                                             </div>
                                                         )}
                                                     </Stack>

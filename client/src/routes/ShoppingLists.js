@@ -66,9 +66,9 @@ function ShoppingLists() {
     const handleItemResolved = async (listId, itemId) => {
         const list = await getListById(listId);
 
-        // Find the item and toggle resolved
-        const updatedItem = list.items.find(item => item.itemId === itemId);
-        updatedItem.resolved = !updatedItem.resolved;
+        // Find the item and update resolved state
+        let updatedItem = list.items.find(item => item.itemId === itemId);
+        updatedItem = { ...updatedItem, resolved: !updatedItem.resolved }
 
         if (USE_MOCKS) {
             // Call mock data
@@ -76,7 +76,6 @@ function ShoppingLists() {
                 item.itemId === itemId ? updatedItem : item
             );
             const updatedList = { ...list, items: updatedItems };
-
             await updateList(updatedList);
         } else {
             // Call the server
@@ -305,7 +304,13 @@ function ShoppingLists() {
                                                                             </span>
                                                                             {item.quantity && (
                                                                                 <span className="text-muted ms-2">
-                                                                                    {item.quantity} {item.unit || ''}
+                                                                                    {item.quantity} {currentLanguage.id === "CZ" &&
+                                                                                        ((item.unit === "tsp" && "ČL") ||
+                                                                                            (item.unit === "tbsp" && "PL") ||
+                                                                                            (item.unit === "pc" && "ks") ||
+                                                                                            (item.unit === "c" && "hrn.") || item.unit)
+                                                                                    }
+                                                                                    {currentLanguage.id === "EN" && item.unit}
                                                                                 </span>
                                                                             )}
                                                                         </div>

@@ -116,7 +116,7 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group as={Col} className="mb-3">
-                            <Form.Label>Unit</Form.Label>
+                            <Form.Label>{currentLanguage.id === "EN" ? "Unit" : "Jednotka"}</Form.Label>
                             <Form.Select
                                 value={formData.unit}
                                 onChange={(e) => {
@@ -124,22 +124,22 @@ function AddItemModal({ show, setAddItemShow, onItemAdd, items }) {
                                 }}
                             >
                                 <option value={""}>---</option>
-                                <option value={"ml"}>mililiter</option>
-                                <option value={"dl"}>deciliter</option>
-                                <option value={"l"}>liter</option>
+                                <option value={"ml"}>{currentLanguage.id === "EN" ? "mililiter" : "mililitr"}</option>
+                                <option value={"dl"}>{currentLanguage.id === "EN" ? "deciliter" : "decilitr"}</option>
+                                <option value={"l"}>{currentLanguage.id === "EN" ? "liter" : "litr"}</option>
                                 <option value={"g"}>gram</option>
-                                <option value={"dkg"}>decagram</option>
+                                <option value={"dkg"}>{currentLanguage.id === "EN" ? "decagram" : "dekagram"}</option>
                                 <option value={"kg"}>kilogram</option>
-                                <option value={"tsp"}>teaspoon</option>
-                                <option value={"tsp"}>tablespoon</option>
-                                <option value={"fl oz"}>fluid ounce</option>
-                                <option value={"pc"}>piece</option>
-                                <option value={"c"}>cup</option>
-                                <option value={"pt"}>pint</option>
-                                <option value={"qt"}>quart</option>
-                                <option value={"gal"}>gallon</option>
-                                <option value={"lb"}>pound</option>
-                                <option value={"oz"}>ounce</option>
+                                <option value={"tsp"}>{currentLanguage.id === "EN" ? "teaspoon" : "čajová lžička"}</option>
+                                <option value={"tbsp"}>{currentLanguage.id === "EN" ? "tablespoon" : "polévková lžíce"}</option>
+                                <option value={"fl oz"}>{currentLanguage.id === "EN" ? "fluid ounce" : "tekutá unce"}</option>
+                                <option value={"pc"}>{currentLanguage.id === "EN" ? "piece" : "kus"}</option>
+                                <option value={"c"}>{currentLanguage.id === "EN" ? "cup" : "hrnek"}</option>
+                                <option value={"pt"}>{currentLanguage.id === "EN" ? "pint" : "pinta"}</option>
+                                <option value={"qt"}>{currentLanguage.id === "EN" ? "quart" : "kvart"}</option>
+                                <option value={"gal"}>{currentLanguage.id === "EN" ? "gallon" : "galon"}</option>
+                                <option value={"lb"}>{currentLanguage.id === "EN" ? "pound" : "libra"}</option>
+                                <option value={"oz"}>{currentLanguage.id === "EN" ? "ounce" : "unce"}</option>
                             </Form.Select>
                         </Form.Group>
                     </Row>
