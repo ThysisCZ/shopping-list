@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, ListGroup, Stack, Accordion } from 'react-bootstrap';
 import Icon from '@mdi/react';
@@ -9,8 +9,10 @@ import { useModeContext } from '../context/ModeContext';
 import { useLanguageContext } from '../context/LanguageContext';
 import AddListModal from '../components/AddListModal';
 import DeleteListModal from '../components/DeleteListModal';
+import DeleteItemModal from '../components/DeleteItemModal';
 import { ClipLoader } from 'react-spinners';
 import ShoppingListChart from '../components/ShoppingListChart';
+import AddItemModal from '../components/AddItemModal';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -37,11 +39,16 @@ function ShoppingLists() {
     const [addListShow, setAddListShow] = useState(false);
     const [deleteListShow, setDeleteListShow] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [userLists, setUserLists] = useState([]);
     const [userListsCall, setUserListsCall] = useState({ state: "pending" });
+    const [addItemShow, setAddItemShow] = useState(false);
+    const [deleteItemShow, setDeleteItemShow] = useState(false);
+
+    const items = selectedList?.items;
 
     // Get lists where user is owner or member
-    const refreshUserLists = useCallback(async () => {
+    const refreshUserLists = async () => {
         setUserListsCall({ state: "pending" });
 
         try {
@@ -56,11 +63,54 @@ function ShoppingLists() {
         } catch (e) {
             setUserListsCall({ state: "error", error: e.message });
         }
-    }, [currentUser.id, getListsByUser]);
+    };
 
     useEffect(() => {
         refreshUserLists();
-    }, [refreshUserLists]);
+        // eslint-disable-next-line
+    }, []);
+
+    const handleAddItemShow = () => {
+        setAddItemShow(true);
+    };
+
+    const handleItemAdded = async (item) => {
+        if (USE_MOCKS) {
+            await updateList({
+                ...selectedList,
+                items: [...selectedList.items, item]
+            });
+
+            await refreshUserLists();
+        } else {
+            const dtoIn = {
+                listId: selectedList.listId,
+                name: item.name,
+                quantity: item.quantity,
+                unit: item.unit
+            }
+
+            try {
+                const response = await fetch(`${SERVER_URI}listItem/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dtoIn)
+                });
+
+                setSelectedList({
+                    ...selectedList,
+                    items: [...selectedList.items, item]
+                });
+
+                await refreshUserLists();
+
+                const dtoOut = await response.json();
+                return dtoOut;
+            } catch (e) {
+                console.error("Error: ", e.message);
+            }
+        }
+    }
 
     // Handle item resolved status toggle
     const handleItemResolved = async (listId, itemId) => {
@@ -103,22 +153,20 @@ function ShoppingLists() {
         }
     };
 
+    const handleDeleteItemShow = (item) => {
+        setSelectedItem(item)
+        setDeleteItemShow(true);
+    };
+
     // Handle item deletion
-    const handleItemDelete = async (listId, itemId) => {
-        const list = await getListById(listId);
-        const deletedItem = list.items.find(item => item.itemId === itemId);
+    const handleItemDelete = async (item) => {
+        const updatedItems = items?.filter(i => i.itemId !== item.itemId);
 
         if (USE_MOCKS) {
-            const updatedItems = list.items.filter(item => item.itemId !== deletedItem.itemId);
-
-            const updatedList = { ...list, items: updatedItems };
-            await updateList(updatedList);
-
-            const refreshed = await getListsByUser(currentUser.id);
-            setUserLists(refreshed);
+            await updateList({ ...selectedList, items: updatedItems });
         } else {
             const dtoIn = {
-                itemId: deletedItem.itemId
+                itemId: item.itemId
             }
 
             try {
@@ -134,7 +182,7 @@ function ShoppingLists() {
                 const dtoOut = await response.json();
                 return dtoOut;
             } catch (e) {
-                console.error("Error: " + e.message);
+                console.error("Error: ", e.message);
             }
         }
     };
@@ -146,7 +194,7 @@ function ShoppingLists() {
 
         if (USE_MOCKS) {
             await deleteList(listId);
-            refreshUserLists();
+            await refreshUserLists();
         } else {
             const dtoIn = {
                 listId: listId
@@ -159,7 +207,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                refreshUserLists();
+                await refreshUserLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -175,7 +223,7 @@ function ShoppingLists() {
 
         if (USE_MOCKS) {
             list.archived ? await unarchiveList(listId) : await archiveList(listId);
-            refreshUserLists();
+            await refreshUserLists();
         } else {
             const dtoIn = {
                 listId: list.listId,
@@ -190,7 +238,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                refreshUserLists();
+                await refreshUserLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -204,7 +252,7 @@ function ShoppingLists() {
     const handleListAdd = async (newList) => {
         if (USE_MOCKS) {
             await addList(newList);
-            refreshUserLists();
+            await refreshUserLists();
         } else {
             const dtoIn = {
                 title: newList.title,
@@ -218,7 +266,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                refreshUserLists();
+                await refreshUserLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -283,7 +331,18 @@ function ShoppingLists() {
                                         <Col key={list.listId} md={6} lg={4} className="mb-4">
                                             <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                                                 <Card.Header style={{ backgroundColor: "salmon" }}>
-                                                    <h5 className="mb-0">{list.title}</h5>
+                                                    <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                                                        <h5 className="mb-0">{list.title}</h5>
+                                                        <Button variant="success" size="sm" onClick={() => {
+                                                            setSelectedList(list);
+                                                            handleAddItemShow();
+                                                        }}
+                                                            style={{ display: "flex", alignItems: "center" }}>
+                                                            <Stack direction="horizontal" gap={1}>
+                                                                <Icon path={mdiPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Add Item" : "Přidat položku"}
+                                                            </Stack>
+                                                        </Button>
+                                                    </div>
                                                 </Card.Header>
                                                 <Card.Body style={{ flex: 1, overflowY: 'auto', backgroundColor: "lightsalmon" }}>
                                                     <ListGroup variant="flush">
@@ -317,7 +376,7 @@ function ShoppingLists() {
                                                                         <Button
                                                                             variant="danger"
                                                                             size="sm"
-                                                                            onClick={() => handleItemDelete(list.listId, item.itemId)}
+                                                                            onClick={() => handleDeleteItemShow(item)}
                                                                             style={{ display: "flex", alignItems: "center", height: 30 }}
                                                                         >
                                                                             <Icon path={mdiClose} size={0.7} />
@@ -427,6 +486,20 @@ function ShoppingLists() {
                 setDeleteListShow={setDeleteListShow}
                 onListDelete={handleListDelete}
                 list={selectedList}
+            />
+
+            <AddItemModal
+                show={addItemShow}
+                setAddItemShow={setAddItemShow}
+                onItemAdd={handleItemAdded}
+                items={items}
+            />
+
+            <DeleteItemModal
+                show={deleteItemShow}
+                setDeleteItemShow={setDeleteItemShow}
+                onItemDelete={handleItemDelete}
+                item={selectedItem}
             />
         </Container>
     )

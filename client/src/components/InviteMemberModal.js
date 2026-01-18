@@ -1,12 +1,17 @@
 import { Modal, Form, Col, Row, Button, ListGroup, Container, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
-import { mdiAccount } from '@mdi/js';
+import { mdiAccount, mdiAccountSearch } from '@mdi/js';
 import { useState } from 'react';
 import { useLanguageContext } from '../context/LanguageContext';
 
 function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, list }) {
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [search, setSearch] = useState("");
+    const [searched, setSearched] = useState(false);
+    const [searchedUsers, setSearchedUsers] = useState([]);
     const { currentLanguage } = useLanguageContext();
+
+    console.log(searchedUsers)
 
     const handleClose = () => {
         setSelectedUsers([]);
@@ -39,6 +44,19 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
         setInviteMemberShow(false);
     }
 
+    const handleSearch = () => {
+        const filteredUsers = availableUsers.filter(user =>
+            user.name.trim().toLowerCase().includes(search.trim().toLowerCase())
+        );
+
+        setSearchedUsers(filteredUsers);
+        setSearched(true);
+
+        if (!search) {
+            setSearched(false);
+        }
+    }
+
     return (
         <Modal show={show} onHide={handleClose} centered>
             <Form onSubmit={handleSubmit}>
@@ -46,33 +64,48 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
                     <Modal.Title>{currentLanguage.id === "EN" ? "Invite Members" : "Pozvat členy"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    <div style={{ display: "flex", flexDirection: "row", gap: 5, marginBottom: 15 }}>
+                        <input
+                            type="text"
+                            placeholder={currentLanguage.id === "EN" ? "Search members..." : "Hledat členy..."}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                        <Button variant="primary" onClick={() => handleSearch()}>
+                            <Stack direction="horizontal">
+                                <Icon path={mdiAccountSearch} size={0.8}></Icon>
+                            </Stack>
+                        </Button>
+
+                    </div>
                     {availableUsers.length === 0 ? (
                         <p className="text-center text-muted">{currentLanguage.id === "EN" ? "No users to invite." : "Žádní uživatelé k pozvání."}</p>
                     ) : (
                         <ListGroup variant="flush">
-                            {availableUsers.map(user => {
-                                return (
-                                    <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
-                                        <Container>
-                                            <Row>
-                                                <Col>
-                                                    <Stack direction="horizontal" gap={3}>
-                                                        <Icon path={mdiAccount} size={0.8} />
-                                                        <b>{user.name}</b>
-                                                    </Stack>
-                                                </Col>
-                                                <Col xs="auto">
-                                                    <Form.Check
-                                                        type="checkbox"
-                                                        checked={selectedUsers.includes(user.id)}
-                                                        onChange={() => handleUserSelection(user.id)}
-                                                    />
-                                                </Col>
-                                            </Row>
-                                        </Container>
-                                    </ListGroup.Item>
-                                );
-                            })}
+                            {
+                                searched && searchedUsers.map(user => {
+                                    return (
+                                        <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
+                                            <Container>
+                                                <Row>
+                                                    <Col>
+                                                        <Stack direction="horizontal" gap={3}>
+                                                            <Icon path={mdiAccount} size={0.8} />
+                                                            <b>{user.name}</b>
+                                                        </Stack>
+                                                    </Col>
+                                                    <Col xs="auto">
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={selectedUsers.includes(user.id)}
+                                                            onChange={() => handleUserSelection(user.id)}
+                                                        />
+                                                    </Col>
+                                                </Row>
+                                            </Container>
+                                        </ListGroup.Item>
+                                    );
+                                })}
                         </ListGroup>
                     )}
                 </Modal.Body>
