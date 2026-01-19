@@ -1,19 +1,13 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts';
 import { Row, Col } from 'react-bootstrap';
-import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useLanguageContext } from '../context/LanguageContext';
-import { useUserContext } from '../context/UserContext';
 
-function ShoppingListChart() {
-    const { shoppingLists } = useShoppingListsContext();
+function ShoppingListChart({ userLists }) {
     const { currentLanguage } = useLanguageContext();
-    const { currentUser } = useUserContext();
-
-    const filteredLists = shoppingLists.filter(list => list.memberIds.includes(currentUser.id));
 
     return (
-        filteredLists.length !== 0 ?
-            <LineChart className="Lists-stats" responsive data={filteredLists}
+        userLists.length !== 0 ?
+            <LineChart className="Lists-stats" responsive data={userLists}
                 margin={{ top: 35, right: 65, left: 65, bottom: 95 }}>
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                 <XAxis dataKey="title" angle={-35} textAnchor="end" label={{ value: currentLanguage.id === "EN" ? "Shopping Lists" : "Nákupní seznamy", position: "bottom", offset: 65 }} />

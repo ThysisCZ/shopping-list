@@ -6,8 +6,8 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
     const defaultForm = {
         listId: "",
         title: "",
-        ownerId: currentUser.id,
-        memberIds: [currentUser.id],
+        ownerId: null,
+        memberIds: [],
         items: [],
         archived: false
     }
@@ -36,10 +36,14 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
         if (!e.target.checkValidity()) return;
 
         const newList = {
-            ...formData
+            ...formData,
+            ownerId: currentUser.id,
+            memberIds: [...formData.memberIds, currentUser.id]
         };
 
         onListAdd(newList);
+
+        console.log(newList);
 
         setFormData(defaultForm);
         setValidated(false);

@@ -21,8 +21,8 @@ function ShoppingLists() {
     const navigate = useNavigate();
     const { currentUser } = useUserContext();
     const {
-        shoppingLists,
         setShoppingLists,
+        getAllLists,
         getListsByUser,
         getListById,
         archiveList,
@@ -40,6 +40,8 @@ function ShoppingLists() {
     const [deleteListShow, setDeleteListShow] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [allLists, setAllLists] = useState([]);
+    const [allListsCall, setAllListsCall] = useState({ state: "pending" });
     const [userLists, setUserLists] = useState([]);
     const [userListsCall, setUserListsCall] = useState({ state: "pending" });
     const [addItemShow, setAddItemShow] = useState(false);
@@ -47,16 +49,24 @@ function ShoppingLists() {
 
     const items = selectedList?.items;
 
-    // Get lists where user is owner or member
-    const refreshUserLists = async () => {
+    // Get shopping lists
+    const refreshLists = async () => {
         setUserListsCall({ state: "pending" });
 
         try {
-            const data = await getListsByUser(currentUser.id);
+            const allData = await getAllLists();
+            const userData = await getListsByUser(currentUser.id);
 
-            if (data) {
-                setUserLists(data);
-                setUserListsCall({ state: "success", data });
+            if (allData) {
+                setAllLists(allData);
+                setAllListsCall({ state: "success", allData });
+            } else {
+                setAllListsCall({ state: "error", error: "Failed to load shopping lists." });
+            }
+
+            if (userData) {
+                setUserLists(userData);
+                setUserListsCall({ state: "success", userData });
             } else {
                 setUserListsCall({ state: "error", error: "Failed to load shopping lists." });
             }
@@ -66,9 +76,9 @@ function ShoppingLists() {
     };
 
     useEffect(() => {
-        refreshUserLists();
+        refreshLists();
         // eslint-disable-next-line
-    }, [showArchived]);
+    }, [showArchived, currentUser]);
 
     const handleAddItemShow = () => {
         setAddItemShow(true);
@@ -81,7 +91,7 @@ function ShoppingLists() {
                 items: [...selectedList.items, item]
             });
 
-            await refreshUserLists();
+            await refreshLists();
         } else {
             const dtoIn = {
                 listId: selectedList.listId,
@@ -102,7 +112,7 @@ function ShoppingLists() {
                     items: [...selectedList.items, item]
                 });
 
-                await refreshUserLists();
+                await refreshLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -194,7 +204,7 @@ function ShoppingLists() {
 
         if (USE_MOCKS) {
             await deleteList(listId);
-            await refreshUserLists();
+            await refreshLists();
         } else {
             const dtoIn = {
                 listId: listId
@@ -207,7 +217,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                await refreshUserLists();
+                await refreshLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -223,7 +233,7 @@ function ShoppingLists() {
 
         if (USE_MOCKS) {
             list.archived ? await unarchiveList(listId) : await archiveList(listId);
-            await refreshUserLists();
+            await refreshLists();
         } else {
             const dtoIn = {
                 listId: list.listId,
@@ -238,7 +248,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                await refreshUserLists();
+                await refreshLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -252,7 +262,7 @@ function ShoppingLists() {
     const handleListAdd = async (newList) => {
         if (USE_MOCKS) {
             await addList(newList);
-            await refreshUserLists();
+            await refreshLists();
         } else {
             const dtoIn = {
                 title: newList.title,
@@ -266,7 +276,7 @@ function ShoppingLists() {
                     body: JSON.stringify(dtoIn)
                 });
 
-                await refreshUserLists();
+                await refreshLists();
 
                 const dtoOut = await response.json();
                 return dtoOut;
@@ -314,7 +324,7 @@ function ShoppingLists() {
             </Row>
 
             <Row>
-                {userListsCall.state === "pending" ?
+                {allListsCall.state === "pending" || userListsCall.state === "pending" ?
                     <div className="d-flex justify-content-center">
                         <ClipLoader color={mode === "light" ? "black" : "white"} />
                     </div> :
@@ -465,7 +475,7 @@ function ShoppingLists() {
                                     </div>
                                 </Accordion.Header>
                                 <Accordion.Body>
-                                    <ShoppingListChart />
+                                    <ShoppingListChart userLists={userLists} />
                                 </Accordion.Body>
                             </Accordion.Item>
                         </Accordion>
@@ -476,7 +486,7 @@ function ShoppingLists() {
                 show={addListShow}
                 setAddListShow={setAddListShow}
                 onListAdd={handleListAdd}
-                shoppingLists={shoppingLists}
+                shoppingLists={allLists}
                 setShoppingLists={setShoppingLists}
                 currentUser={currentUser}
             />

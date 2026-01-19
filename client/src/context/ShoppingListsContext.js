@@ -44,7 +44,9 @@ export function ShoppingListsProvider({ children }) {
                     body: JSON.stringify(dtoIn)
                 });
 
-                const dtoOut = await response.json();
+                const result = await response.json();
+                const dtoOut = result.itemList;
+
                 return dtoOut;
             } catch (e) {
                 console.error("Error: " + e.message);
