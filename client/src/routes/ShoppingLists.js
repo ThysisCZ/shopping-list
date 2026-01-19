@@ -68,7 +68,7 @@ function ShoppingLists() {
     useEffect(() => {
         refreshUserLists();
         // eslint-disable-next-line
-    }, []);
+    }, [showArchived]);
 
     const handleAddItemShow = () => {
         setAddItemShow(true);

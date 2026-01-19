@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import mockData from '../mockData.json';
 import { useUserContext } from './UserContext';
 
@@ -82,7 +82,7 @@ export function ShoppingListsProvider({ children }) {
     };
 
     // Get shopping lists where the user is a member or owner
-    const getListsByUser = useCallback(async (userId) => {
+    const getListsByUser = async (userId) => {
         if (USE_MOCKS) {
             // Call mock data
             return new Promise(resolve => {
@@ -118,7 +118,7 @@ export function ShoppingListsProvider({ children }) {
                 console.error("Error: " + e.message);
             }
         }
-    }, [showArchived]);
+    };
 
     // Archive a shopping list
     const archiveList = (listId) => {
