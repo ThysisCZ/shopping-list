@@ -55,17 +55,6 @@
     font-weight: bold;
 }
 
-@media (max-width: 768px) {
-    .Top-panel-container {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .Settings-container {
-        margin-left: 26px;
-    }
-}
-
 @media (max-width: 576px) {
     .Lists-stats {
         height: 400px

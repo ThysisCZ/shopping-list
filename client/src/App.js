@@ -1,12 +1,13 @@
 import './App.css';
 import './index.css';
-import UserRoleSelector from './components/UserRoleSelector';
 import LanguageSelector from './components/LanguageSelector';
 import { useUserContext } from './context/UserContext';
 import { useShoppingListsContext } from './context/ShoppingListsContext';
 import { useModeContext } from './context/ModeContext';
 import { useLanguageContext } from './context/LanguageContext';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Register from './routes/Register';
+import Login from './routes/Login';
 import Detail from './routes/Detail';
 import ShoppingLists from './routes/ShoppingLists';
 import Icon from '@mdi/react';
@@ -15,7 +16,7 @@ import { Button } from 'react-bootstrap';
 import setBodyColor from './setBodyColor';
 
 function App() {
-  const { currentUser, users, authenticate } = useUserContext();
+  const { user } = useUserContext();
   const { shoppingLists } = useShoppingListsContext();
   const { mode, setMode } = useModeContext();
   const { languages, currentLanguage, setCurrentLanguage } = useLanguageContext();
@@ -43,19 +44,7 @@ function App() {
       <BrowserRouter>
         <div style={{ backgroundColor: mode === "light" ? "white" : "#212121" }}>
           <div className="Top-panel-container" style={{ color: mode === "light" ? "black" : "white" }}>
-            <div className="User-container">
-              <div>
-                <b>{currentLanguage.id === "EN" ? "Current user" : "Aktuální uživatel"}:</b>
-              </div>
-              <div>
-                <UserRoleSelector
-                  users={users}
-                  authenticate={authenticate}
-                  style={{
-                    backgroundColor: mode === "light" ? "white" : "#212121"
-                  }}
-                />
-              </div>
+            <div>
             </div>
             <div className="Settings-container">
               <div className="Settings" style={{ maxWidth: 190 }}>
@@ -76,11 +65,12 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Navigate to="/list" />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/list" element={<ShoppingLists />} />
             <Route path="/detail/:id" element={
               <Detail
-                currentUser={currentUser}
-                users={users}
+                currentUser={user}
                 shoppingLists={shoppingLists}
               />
             }

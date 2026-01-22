@@ -13,7 +13,7 @@ function DeleteListModal({ show, setDeleteListShow, onListDelete, list }) {
         e.preventDefault();
         e.stopPropagation();
 
-        onListDelete(list.listId);
+        onListDelete(list._id);
         setDeleteListShow(false);
     }
 

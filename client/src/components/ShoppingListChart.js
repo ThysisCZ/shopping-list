@@ -6,7 +6,7 @@ function ShoppingListChart({ userLists }) {
     const { currentLanguage } = useLanguageContext();
 
     return (
-        userLists.length !== 0 ?
+        userLists?.length !== 0 ?
             <LineChart className="Lists-stats" responsive data={userLists}
                 margin={{ top: 35, right: 65, left: 65, bottom: 95 }}>
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />

@@ -20,7 +20,7 @@ export function ShoppingListsProvider({ children }) {
     const [shoppingLists, setShoppingLists] = useState(initialLists);
     const [showArchived, setShowArchived] = useState(false);
     const shoppingListsRef = useRef(shoppingLists);
-    const { currentUser } = useUserContext();
+    const { token } = useUserContext();
 
     // Keep reference updated
     useEffect(() => {
@@ -32,20 +32,17 @@ export function ShoppingListsProvider({ children }) {
         if (USE_MOCKS) {
             return shoppingListsRef.current
         } else {
-            // Call the server
-            const dtoIn = {
-                archived: true
-            }
-
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/list`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn)
+                const response = await fetch(`${SERVER_URI}/shoppingList/list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 const result = await response.json();
-                const dtoOut = result.itemList;
+                const dtoOut = result.data
+
+                console.log("All lists:", dtoOut);
 
                 return dtoOut;
             } catch (e) {
@@ -59,24 +56,20 @@ export function ShoppingListsProvider({ children }) {
         if (USE_MOCKS) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const list = shoppingListsRef.current.find(list => list.listId === listId);
+                    const list = shoppingListsRef.current.find(list => list.list === listId);
                     resolve(list);
                 }, 200);
             });
         } else {
-            const dtoIn = {
-                listId: listId
-            }
-
+            // Call the server
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/get`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn)
+                const response = await fetch(`${SERVER_URI}/shoppingList/get/${listId}`, {
+                    method: "GET",
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const dtoOut = await response.json();
-                return dtoOut;
+                return dtoOut
             } catch (e) {
                 console.error("Error: " + e.message);
             }
@@ -94,26 +87,24 @@ export function ShoppingListsProvider({ children }) {
                     );
 
                     const dtoOut = showArchived ? result
-                        : result.filter(list => !list.archived)
+                        : result.filter(list => !list.archived);
 
                     resolve(dtoOut);
                 }, 200);
             });
         } else {
             // Call the server
-            const dtoIn = {
-                archived: showArchived
-            }
-
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/list`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn)
+                const response = await fetch(`${SERVER_URI}/shoppingList/list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
-                const result = await response.json();
-                const dtoOut = result.itemList.filter(list => list.memberIds.includes(userId));
+                let result = await response.json();
+                result = result.data.filter(list => list.memberIds.includes(userId));
+                const dtoOut = showArchived ? result
+                    : result.filter(list => !list.archived);
 
                 return dtoOut;
             } catch (e) {
@@ -166,13 +157,13 @@ export function ShoppingListsProvider({ children }) {
         } else {
             // Call the server
             const dtoIn = {
-                listId: updatedList.listId,
+                _id: updatedList._id,
                 title: updatedList.title,
                 archived: updatedList.archived
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
+                const response = await fetch(`${SERVER_URI}/shoppingList/update`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dtoIn)
@@ -192,9 +183,7 @@ export function ShoppingListsProvider({ children }) {
             setTimeout(() => {
                 const listWithIds = {
                     ...newList,
-                    listId: Date.now().toString(),
-                    ownerId: currentUser.id,
-                    memberIds: [currentUser.id]
+                    listId: Date.now().toString()
                 };
 
                 setShoppingLists(prev => [...prev, listWithIds]);

@@ -19,7 +19,7 @@ const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function ShoppingLists() {
     const navigate = useNavigate();
-    const { currentUser } = useUserContext();
+    const { user, token } = useUserContext();
     const {
         setShoppingLists,
         getAllLists,
@@ -51,11 +51,12 @@ function ShoppingLists() {
 
     // Get shopping lists
     const refreshLists = async () => {
+        setAllListsCall({ state: "pending" });
         setUserListsCall({ state: "pending" });
 
         try {
             const allData = await getAllLists();
-            const userData = await getListsByUser(currentUser.id);
+            const userData = await getListsByUser(user.id);
 
             if (allData) {
                 setAllLists(allData);
@@ -78,7 +79,7 @@ function ShoppingLists() {
     useEffect(() => {
         refreshLists();
         // eslint-disable-next-line
-    }, [showArchived, currentUser]);
+    }, [showArchived, user]);
 
     const handleAddItemShow = () => {
         setAddItemShow(true);
@@ -94,14 +95,14 @@ function ShoppingLists() {
             await refreshLists();
         } else {
             const dtoIn = {
-                listId: selectedList.listId,
+                _id: selectedList._id,
                 name: item.name,
                 quantity: item.quantity,
                 unit: item.unit
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}listItem/create`, {
+                const response = await fetch(`${SERVER_URI}/listItem/create`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dtoIn)
@@ -127,7 +128,7 @@ function ShoppingLists() {
         const list = await getListById(listId);
 
         // Find the item and update resolved state
-        let updatedItem = list.items.find(item => item.itemId === itemId);
+        let updatedItem = list.items.find(item => item._id === itemId);
         updatedItem = { ...updatedItem, resolved: !updatedItem.resolved }
 
         if (USE_MOCKS) {
@@ -141,18 +142,18 @@ function ShoppingLists() {
             // Call the server
             try {
                 const dtoIn = {
-                    itemId: updatedItem.itemId,
+                    _id: updatedItem._id,
                     resolved: updatedItem.resolved
                 }
 
-                const response = await fetch(`${SERVER_URI}listItem/update`, {
+                const response = await fetch(`${SERVER_URI}/listItem/update`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dtoIn)
                 });
 
                 // Refresh without loading
-                const refreshed = await getListsByUser(currentUser.id);
+                const refreshed = await getListsByUser(user.id);
                 setUserLists(refreshed);
 
                 const dtoOut = await response.json();
@@ -176,17 +177,17 @@ function ShoppingLists() {
             await updateList({ ...selectedList, items: updatedItems });
         } else {
             const dtoIn = {
-                itemId: item.itemId
+                _id: item._id
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}listItem/delete`, {
+                const response = await fetch(`${SERVER_URI}/listItem/delete`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dtoIn)
                 });
 
-                const refreshed = await getListsByUser(currentUser.id);
+                const refreshed = await getListsByUser(user.id);
                 setUserLists(refreshed);
 
                 const dtoOut = await response.json();
@@ -206,15 +207,12 @@ function ShoppingLists() {
             await deleteList(listId);
             await refreshLists();
         } else {
-            const dtoIn = {
-                listId: listId
-            }
-
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/delete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn)
+                const response = await fetch(`${SERVER_URI}/shoppingList/delete/${listId}`, {
+                    method: "DELETE",
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 await refreshLists();
@@ -236,21 +234,24 @@ function ShoppingLists() {
             await refreshLists();
         } else {
             const dtoIn = {
-                listId: list.listId,
-                title: list.title,
                 archived: !list.archived
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${listId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
                 await refreshLists();
 
-                const dtoOut = await response.json();
+                const result = await response.json();
+                const dtoOut = result.data;
+
                 return dtoOut;
             } catch (e) {
                 console.error("Error: ", e.message);
@@ -264,21 +265,23 @@ function ShoppingLists() {
             await addList(newList);
             await refreshLists();
         } else {
-            const dtoIn = {
-                title: newList.title,
-                ownerId: newList.ownerId
-            }
-
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/create`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dtoIn)
+                const response = await fetch(`${SERVER_URI}/shoppingList/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(newList)
                 });
 
                 await refreshLists();
 
-                const dtoOut = await response.json();
+                const result = await response.json();
+                const dtoOut = result.data;
+
+                console.log("New list:", dtoOut);
+
                 return dtoOut;
             } catch (e) {
                 console.error("Error: ", e.message);
@@ -293,7 +296,7 @@ function ShoppingLists() {
 
     // Check if user is owner
     const isOwner = (list) => {
-        return list.ownerId === currentUser.id;
+        return list.ownerId === user.id;
     };
 
     return (
@@ -337,8 +340,8 @@ function ShoppingLists() {
                             </Accordion.Header>
                             <Accordion.Body>
                                 <Row>
-                                    {userLists.map(list => (
-                                        <Col key={list.listId} md={6} lg={4} className="mb-4">
+                                    {userLists?.map(list => (
+                                        <Col key={list._id} md={6} lg={4} className="mb-4">
                                             <Card style={{ height: "100%", display: "flex", flexDirection: "column" }}>
                                                 <Card.Header style={{ backgroundColor: "salmon" }}>
                                                     <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
@@ -358,12 +361,12 @@ function ShoppingLists() {
                                                     <ListGroup variant="flush">
                                                         {list.items.length > 0 ? (
                                                             list.items.map(item => (
-                                                                <ListGroup.Item key={item.itemId} style={{ backgroundColor: "lightsalmon" }}>
+                                                                <ListGroup.Item key={item._id} style={{ backgroundColor: "lightsalmon" }}>
                                                                     <Stack direction="horizontal" gap={2}>
                                                                         <Form.Check
                                                                             type="checkbox"
                                                                             checked={item.resolved}
-                                                                            onChange={() => handleItemResolved(list.listId, item.itemId)}
+                                                                            onChange={() => handleItemResolved(list._id, item._id)}
                                                                         />
                                                                         <div style={{ flex: 1 }}>
                                                                             <span style={{
@@ -421,7 +424,7 @@ function ShoppingLists() {
                                                                 <Button
                                                                     variant={list.archived ? "secondary" : "warning"}
                                                                     size="sm"
-                                                                    onClick={() => handleArchive(list.listId)}
+                                                                    onClick={() => handleArchive(list._id)}
                                                                     style={{ display: "flex", alignItems: "center" }}
                                                                 >
                                                                     <Stack direction="horizontal" gap={1}>
@@ -443,7 +446,7 @@ function ShoppingLists() {
                                                         <Button
                                                             variant="primary"
                                                             size="sm"
-                                                            onClick={() => handleViewDetail(list.listId)}
+                                                            onClick={() => handleViewDetail(list._id)}
                                                             style={{ display: "flex", alignItems: "center" }}
                                                         >
                                                             <Stack direction="horizontal" gap={1}>
@@ -455,7 +458,7 @@ function ShoppingLists() {
                                             </Card>
                                         </Col>
                                     ))}
-                                    {userLists.length === 0 && userListsCall.state !== "pending" && (
+                                    {userLists?.length === 0 && userListsCall.state !== "pending" && (
                                         <Row>
                                             <Col className="text-center mt-4">
                                                 <p style={{ color: mode === "dark" ? "light" : "dark", marginBottom: 25 }}>
@@ -488,7 +491,7 @@ function ShoppingLists() {
                 onListAdd={handleListAdd}
                 shoppingLists={allLists}
                 setShoppingLists={setShoppingLists}
-                currentUser={currentUser}
+                user={user}
             />
 
             <DeleteListModal

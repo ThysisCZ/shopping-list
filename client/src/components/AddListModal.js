@@ -4,12 +4,7 @@ import { useLanguageContext } from '../context/LanguageContext';
 
 function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentUser }) {
     const defaultForm = {
-        listId: "",
-        title: "",
-        ownerId: null,
-        memberIds: [],
-        items: [],
-        archived: false
+        title: ""
     }
 
     const [validated, setValidated] = useState(false);
@@ -36,14 +31,10 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
         if (!e.target.checkValidity()) return;
 
         const newList = {
-            ...formData,
-            ownerId: currentUser.id,
-            memberIds: [...formData.memberIds, currentUser.id]
+            ...formData
         };
 
         onListAdd(newList);
-
-        console.log(newList);
 
         setFormData(defaultForm);
         setValidated(false);
@@ -67,7 +58,7 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                             value={formData.title}
                             onChange={(e) => {
                                 setField("title", e.target.value);
-                                const isDuplicate = shoppingLists.some(
+                                const isDuplicate = shoppingLists?.some(
                                     (list) => list.title.toLowerCase() === e.target.value.toLowerCase()
                                 );
                                 e.target.setCustomValidity(isDuplicate ? "Duplicate" : "");
@@ -76,12 +67,12 @@ function AddListModal({ show, setAddListShow, onListAdd, shoppingLists, currentU
                             required
                             isInvalid={
                                 (validated && formData.title.length === 0) ||
-                                (validated && shoppingLists.some((list) => list.title.toLowerCase() === formData.title.toLowerCase()))
+                                (validated && shoppingLists?.some((list) => list.title.toLowerCase() === formData.title.toLowerCase()))
                             }
                         />
                         <Form.Control.Feedback type="invalid">
                             {validated && formData.title.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
-                            {validated && shoppingLists.some((list) => list.title.toLowerCase() === formData.title.toLowerCase())
+                            {validated && shoppingLists?.some((list) => list.title.toLowerCase() === formData.title.toLowerCase())
                                 && (currentLanguage.id === "EN" ? "This list already exists." : "Tento seznam již existuje.")}
                         </Form.Control.Feedback>
                     </Form.Group>

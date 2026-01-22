@@ -1,5 +1,4 @@
 import { createContext, useContext, useState } from 'react';
-import mockData from '../mockData.json';
 
 // Create user context
 const UserContext = createContext();
@@ -11,27 +10,28 @@ export function useUserContext() {
 
 // Component that provides user context
 export function UserProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState({
-        "id": "1",
-        "name": "Alice"
-    });
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(null);
 
-    const users = mockData.users;
+    // Login function - stores user data and token
+    const login = (userData, authToken) => {
+        setUser(userData);
+        setToken(authToken);
+    };
 
-    // Find user based on ID
-    const authenticate = (userId) => {
-        const userData = users.find(user => user.id === userId);
+    // Logout function - clears everything
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+    };
 
-        if (userData) {
-            setCurrentUser(userData)
-        }
-    }
-
+    // Value that will be accessible to all components
     const value = {
-        currentUser,
-        users,
-        authenticate
-    }
+        user,
+        token,
+        login,
+        logout
+    };
 
     return (
         <UserContext.Provider value={value}>
