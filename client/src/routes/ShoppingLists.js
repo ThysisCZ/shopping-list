@@ -19,7 +19,7 @@ const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
 
 function ShoppingLists() {
     const navigate = useNavigate();
-    const { user, token } = useUserContext();
+    const { user, token, setUsers } = useUserContext();
     const {
         setShoppingLists,
         getAllLists,
@@ -76,10 +76,34 @@ function ShoppingLists() {
         }
     };
 
+    const getAllUsers = async () => {
+        try {
+            const response = await fetch(`${SERVER_URI}/user/list`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            const result = await response.json();
+            const dtoOut = result.data;
+
+            console.log("All users", dtoOut)
+
+            setUsers(dtoOut);
+        } catch (e) {
+            console.error("Error: " + e.message)
+        }
+    }
+
     useEffect(() => {
         refreshLists();
         // eslint-disable-next-line
     }, [showArchived, user]);
+
+    useEffect(() => {
+        getAllUsers()
+        // eslint-disable-next-line
+    }, []);
 
     const handleAddItemShow = () => {
         setAddItemShow(true);
@@ -95,16 +119,16 @@ function ShoppingLists() {
             await refreshLists();
         } else {
             const dtoIn = {
-                _id: selectedList._id,
-                name: item.name,
-                quantity: item.quantity,
-                unit: item.unit
+                items: [...selectedList.items, item]
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}/listItem/create`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${selectedList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -131,24 +155,27 @@ function ShoppingLists() {
         let updatedItem = list.items.find(item => item._id === itemId);
         updatedItem = { ...updatedItem, resolved: !updatedItem.resolved }
 
+        const updatedItems = list.items.map(item =>
+            item._id === itemId ? updatedItem : item
+        );
+
         if (USE_MOCKS) {
             // Call mock data
-            const updatedItems = list.items.map(item =>
-                item.itemId === itemId ? updatedItem : item
-            );
             const updatedList = { ...list, items: updatedItems };
             await updateList(updatedList);
         } else {
             // Call the server
             try {
                 const dtoIn = {
-                    _id: updatedItem._id,
-                    resolved: updatedItem.resolved
+                    items: updatedItems
                 }
 
-                const response = await fetch(`${SERVER_URI}/listItem/update`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${listId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -171,19 +198,22 @@ function ShoppingLists() {
 
     // Handle item deletion
     const handleItemDelete = async (item) => {
-        const updatedItems = items?.filter(i => i.itemId !== item.itemId);
+        const updatedItems = items?.filter(i => i._id !== item._id);
 
         if (USE_MOCKS) {
             await updateList({ ...selectedList, items: updatedItems });
         } else {
             const dtoIn = {
-                _id: item._id
+                items: updatedItems
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}/listItem/delete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${selectedList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -389,7 +419,10 @@ function ShoppingLists() {
                                                                         <Button
                                                                             variant="danger"
                                                                             size="sm"
-                                                                            onClick={() => handleDeleteItemShow(item)}
+                                                                            onClick={() => {
+                                                                                setSelectedList(list);
+                                                                                handleDeleteItemShow(item)
+                                                                            }}
                                                                             style={{ display: "flex", alignItems: "center", height: 30 }}
                                                                         >
                                                                             <Icon path={mdiClose} size={0.7} />
@@ -513,6 +546,7 @@ function ShoppingLists() {
                 setDeleteItemShow={setDeleteItemShow}
                 onItemDelete={handleItemDelete}
                 item={selectedItem}
+                list={selectedList}
             />
         </Container>
     )

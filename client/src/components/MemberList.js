@@ -6,6 +6,7 @@ import InviteMemberModal from './InviteMemberModal';
 import DeleteMemberModal from './DeleteMemberModal';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useLanguageContext } from '../context/LanguageContext';
+import { useUserContext } from '../context/UserContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -16,6 +17,7 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     const [selectedMember, setSelectedMember] = useState(null);
     const { updateList } = useShoppingListsContext();
     const { currentLanguage } = useLanguageContext();
+    const { token } = useUserContext();
 
     const handleMembersInvited = async (newIds) => {
         // Add new IDs to shopping list member IDs
@@ -25,14 +27,16 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
             await updateList(updatedList);
         } else {
             const dtoIn = {
-                listId: shoppingList.listId,
-                userIds: newIds
+                memberIds: [...shoppingList.memberIds, ...newIds]
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}membership/invite`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -47,20 +51,22 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
     };
 
     const handleMemberDeleted = async (member) => {
-        const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== member.id) }
+        const updatedList = { ...shoppingList, memberIds: shoppingList.memberIds.filter(id => id !== member._id) }
 
         if (USE_MOCKS) {
             await updateList(updatedList);
         } else {
             const dtoIn = {
-                listId: shoppingList.listId,
-                userId: member.id
+                memberIds: shoppingList.memberIds.filter(id => id !== member._id)
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}membership/delete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -116,21 +122,21 @@ function MemberList({ currentUser, users, shoppingList, setShoppingList }) {
                         <Accordion.Body>
                             <ListGroup variant="flush" >
                                 {users.map(user => (
-                                    shoppingList.memberIds.includes(user.id) && (
-                                        <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
+                                    shoppingList.memberIds.includes(user._id) && (
+                                        <ListGroup.Item key={user._id} style={{ backgroundColor: 'lightsalmon' }}>
                                             <Container>
                                                 <Row>
                                                     <Col>
                                                         <Stack direction="horizontal" gap={3}>
                                                             <Icon path={mdiAccount} size={0.8} />
                                                             <b>{user.name}</b>
-                                                            {user.id === shoppingList.ownerId && (
+                                                            {user._id === shoppingList.ownerId && (
                                                                 <Badge bg="primary">{currentLanguage.id === "EN" ? "Owner" : "Vlastník"}</Badge>
                                                             )}
                                                         </Stack>
                                                     </Col>
                                                     <Col xs="auto">
-                                                        {currentUser.id === shoppingList.ownerId && user.id !== shoppingList.ownerId && (
+                                                        {currentUser.id === shoppingList.ownerId && user._id !== shoppingList.ownerId && (
                                                             <Button
                                                                 variant="danger"
                                                                 size="sm"

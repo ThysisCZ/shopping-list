@@ -11,8 +11,6 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
     const [searchedUsers, setSearchedUsers] = useState([]);
     const { currentLanguage } = useLanguageContext();
 
-    console.log(searchedUsers)
-
     const handleClose = () => {
         setSelectedUsers([]);
         setInviteMemberShow(false);
@@ -29,8 +27,8 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
 
     // Filter owner and users that are already members
     const availableUsers = users.filter(user => {
-        const isOwner = user.id === list.ownerId;
-        const isMember = list.memberIds.includes(user.id);
+        const isOwner = user._id === list.ownerId;
+        const isMember = list.memberIds.includes(user._id);
         return !isOwner && !isMember;
     });
 
@@ -85,7 +83,7 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
                             {
                                 searched && searchedUsers.map(user => {
                                     return (
-                                        <ListGroup.Item key={user.id} style={{ backgroundColor: 'lightsalmon' }}>
+                                        <ListGroup.Item key={user._id} style={{ backgroundColor: 'lightsalmon' }}>
                                             <Container>
                                                 <Row>
                                                     <Col>
@@ -97,8 +95,8 @@ function InviteMemberModal({ show, setInviteMemberShow, onMembersInvite, users, 
                                                     <Col xs="auto">
                                                         <Form.Check
                                                             type="checkbox"
-                                                            checked={selectedUsers.includes(user.id)}
-                                                            onChange={() => handleUserSelection(user.id)}
+                                                            checked={selectedUsers.includes(user._id)}
+                                                            onChange={() => handleUserSelection(user._id)}
                                                         />
                                                     </Col>
                                                 </Row>

@@ -6,6 +6,7 @@ import LeaveListModal from './LeaveListModal';
 import { useNavigate } from 'react-router-dom';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useLanguageContext } from '../context/LanguageContext';
+import { useUserContext } from '../context/UserContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -18,6 +19,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
     const navigate = useNavigate();
     const { updateList } = useShoppingListsContext();
     const { currentLanguage } = useLanguageContext();
+    const { token } = useUserContext();
 
     // Sync edit state when shopping list title changes
     useEffect(() => {
@@ -36,14 +38,16 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
             await updateList(updatedList);
         } else {
             const dtoIn = {
-                listId: shoppingList.listId,
-                userId: currentUser.id
+                memberIds: shoppingList.memberIds.filter(id => id !== currentUser.id)
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}membership/delete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -59,7 +63,7 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
         setLeaveListShow(true);
     }
 
-    const listOwner = users.find(user => user.id === ownerId);
+    const listOwner = users.find(user => user._id === ownerId);
 
     // Change list title based on input field value
     async function handleEdited(e) {
@@ -82,15 +86,16 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
             setValidated(false);
         } else {
             const dtoIn = {
-                listId: updatedList.listId,
-                title: updatedList.title,
-                archived: updatedList.archived
+                title: updatedList.title
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}shoppingList/update`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -126,8 +131,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                         const inputValue = e.target.value;
                                                         setEdit(inputValue);
                                                         const isDuplicate = shoppingLists.some(
-                                                            (list) => list.listId !== shoppingList.listId &&
-                                                                list.title.toLowerCase() === inputValue.toLowerCase()
+                                                            (list) => list._id !== shoppingList._id &&
+                                                                list.title.trim().toLowerCase() === inputValue.trim().toLowerCase()
                                                         );
                                                         e.target.setCustomValidity(isDuplicate ? "Duplicate" : "");
                                                     }}
@@ -137,8 +142,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                         validated && (
                                                             edit.length === 0 ||
                                                             shoppingLists.some(
-                                                                (list) => list.listId !== shoppingList.listId &&
-                                                                    list.title.toLowerCase() === edit.toLowerCase()
+                                                                (list) => list._id !== shoppingList._id &&
+                                                                    list.title.trim().toLowerCase() === edit.trim().toLowerCase()
                                                             )
                                                         )
                                                     }
@@ -146,8 +151,8 @@ function ListHeader({ currentUser, users, shoppingList, setShoppingList, shoppin
                                                 <Form.Control.Feedback type="invalid">
                                                     {validated && edit.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                                     {validated && shoppingLists.some(
-                                                        (list) => list.listId !== shoppingList.listId &&
-                                                            list.title.toLowerCase() === edit.toLowerCase()
+                                                        (list) => list._id !== shoppingList._id &&
+                                                            list.title.trim().toLowerCase() === edit.trim().toLowerCase()
                                                     ) && (currentLanguage.id === "EN" ? "This list already exists." : "Tento seznam již existuje.")}
                                                 </Form.Control.Feedback>
                                             </Form.Group>

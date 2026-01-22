@@ -16,7 +16,7 @@ import { Button } from 'react-bootstrap';
 import setBodyColor from './setBodyColor';
 
 function App() {
-  const { user } = useUserContext();
+  const { user, users } = useUserContext();
   const { shoppingLists } = useShoppingListsContext();
   const { mode, setMode } = useModeContext();
   const { languages, currentLanguage, setCurrentLanguage } = useLanguageContext();
@@ -71,6 +71,7 @@ function App() {
             <Route path="/detail/:id" element={
               <Detail
                 currentUser={user}
+                users={users}
                 shoppingLists={shoppingLists}
               />
             }

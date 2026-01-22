@@ -40,7 +40,8 @@ export function ShoppingListsProvider({ children }) {
                 });
 
                 const result = await response.json();
-                const dtoOut = result.data
+                const dtoOut = result.data;
+                setShoppingLists(dtoOut);
 
                 console.log("All lists:", dtoOut);
 

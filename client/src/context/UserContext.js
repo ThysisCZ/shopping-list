@@ -11,6 +11,7 @@ export function useUserContext() {
 // Component that provides user context
 export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [users, setUsers] = useState(null);
     const [token, setToken] = useState(null);
 
     // Login function - stores user data and token
@@ -28,6 +29,8 @@ export function UserProvider({ children }) {
     // Value that will be accessible to all components
     const value = {
         user,
+        users,
+        setUsers,
         token,
         login,
         logout

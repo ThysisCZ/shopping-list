@@ -6,6 +6,7 @@ import AddItemModal from './AddItemModal';
 import DeleteItemModal from './DeleteItemModal';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useLanguageContext } from '../context/LanguageContext';
+import { useUserContext } from '../context/UserContext';
 
 const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 const USE_MOCKS = process.env.REACT_APP_USE_MOCKS === "true";
@@ -17,6 +18,7 @@ function ItemList({ shoppingList, setShoppingList }) {
     const [selectedItem, setSelectedItem] = useState(null);
     const { updateList, getListById } = useShoppingListsContext();
     const { currentLanguage } = useLanguageContext();
+    const { token } = useUserContext();
 
     const items = shoppingList.items;
 
@@ -27,23 +29,23 @@ function ItemList({ shoppingList, setShoppingList }) {
     // Update resolved status of an item
     const handleResolvedStatus = async (itemId) => {
         const updatedItems = items.map(item =>
-            item.itemId === itemId ? { ...item, resolved: !item.resolved } : item
-        )
-
-        const updatedItem = updatedItems.find(item => item.itemId === itemId);
+            item._id === itemId ? { ...item, resolved: !item.resolved } : item
+        );
 
         if (USE_MOCKS) {
             await updateList({ ...shoppingList, items: updatedItems });
         } else {
             const dtoIn = {
-                itemId: itemId,
-                resolved: updatedItem.resolved
+                items: updatedItems
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}listItem/update`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -68,16 +70,16 @@ function ItemList({ shoppingList, setShoppingList }) {
             setShoppingList(refreshed);
         } else {
             const dtoIn = {
-                listId: shoppingList.listId,
-                name: item.name,
-                quantity: item.quantity,
-                unit: item.unit
+                items: [...shoppingList.items, item]
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}listItem/create`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -86,7 +88,7 @@ function ItemList({ shoppingList, setShoppingList }) {
                     items: [...shoppingList.items, item]
                 });
 
-                const refreshed = await getListById(shoppingList.listId);
+                const refreshed = await getListById(shoppingList._id);
                 setShoppingList(refreshed);
 
                 const dtoOut = await response.json();
@@ -98,19 +100,22 @@ function ItemList({ shoppingList, setShoppingList }) {
     }
 
     const handleItemDeleted = async (item) => {
-        const updatedItems = items.filter(i => i.itemId !== item.itemId);
+        const updatedItems = items.filter(i => i._id !== item._id);
 
         if (USE_MOCKS) {
             await updateList({ ...shoppingList, items: updatedItems });
         } else {
             const dtoIn = {
-                itemId: item.itemId
+                items: updatedItems
             }
 
             try {
-                const response = await fetch(`${SERVER_URI}listItem/delete`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`${SERVER_URI}/shoppingList/update/${shoppingList._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(dtoIn)
                 });
 
@@ -175,7 +180,7 @@ function ItemList({ shoppingList, setShoppingList }) {
                         <Accordion.Body>
                             <ListGroup variant="flush">
                                 {filteredItems.length > 0 ? filteredItems.map(item => (
-                                    <ListGroup.Item key={item.itemId} style={{ backgroundColor: 'lightsalmon' }}>
+                                    <ListGroup.Item key={item._id} style={{ backgroundColor: 'lightsalmon' }}>
                                         <Container style={{ minWidth: 250 }}>
                                             <Row>
                                                 <Col>
@@ -183,7 +188,7 @@ function ItemList({ shoppingList, setShoppingList }) {
                                                         <Form.Check
                                                             type="checkbox"
                                                             checked={item.resolved}
-                                                            onChange={() => handleResolvedStatus(item.itemId)}
+                                                            onChange={() => handleResolvedStatus(item._id)}
                                                         />
                                                         <div>
                                                             <b style={{
