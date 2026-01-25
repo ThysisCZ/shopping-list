@@ -40,8 +40,56 @@ async function listUsersController(req, res) {
     res.send({ "status": true, "data": users });
 }
 
+// Request password reset controller
+async function requestPasswordResetController(req, res) {
+
+    try {
+        const { email } = req.body;
+
+        const result = await userService.requestPasswordResetService(email);
+
+        res.status(200).send(result);
+
+    } catch (error) {
+        res.status(400).send({ success: false, message: 'Failed to send reset code.' });
+    }
+};
+
+// Verify reset code controller
+async function verifyResetCodeController(req, res) {
+
+    try {
+        const { email, code } = req.body;
+
+        const result = await userService.verifyResetCodeService(email, code);
+
+        res.status(200).send(result);
+
+    } catch (error) {
+        res.status(400).send({ success: false, message: error.message || 'Invalid reset code.' });
+    }
+};
+
+// Reset password controller
+async function resetPasswordController(req, res) {
+
+    try {
+        const { email, code, newPassword } = req.body;
+
+        const result = await userService.resetPasswordService(email, code, newPassword);
+
+        res.status(200).send(result);
+
+    } catch (error) {
+        res.status(400).send({ success: false, message: error.message || 'Failed to reset password.' });
+    }
+};
+
 module.exports = {
     registerUserController,
     loginUserController,
-    listUsersController
+    listUsersController,
+    requestPasswordResetController,
+    verifyResetCodeController,
+    resetPasswordController
 }

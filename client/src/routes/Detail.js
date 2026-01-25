@@ -6,6 +6,7 @@ import ResolvedStateChart from '../components/ResolvedStateChart';
 import { useShoppingListsContext } from '../context/ShoppingListsContext';
 import { useModeContext } from '../context/ModeContext';
 import { useLanguageContext } from '../context/LanguageContext';
+import { useUserContext } from '../context/UserContext';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Stack } from 'react-bootstrap';
@@ -17,6 +18,7 @@ function Detail({ currentUser, users, shoppingLists }) {
     const { getListById } = useShoppingListsContext();
     const { mode } = useModeContext();
     const { currentLanguage } = useLanguageContext();
+    const { user } = useUserContext();
     const [shoppingList, setShoppingList] = useState(null);
     const [shoppingListCall, setShoppingListCall] = useState(null);
     const navigate = useNavigate();
@@ -42,6 +44,14 @@ function Detail({ currentUser, users, shoppingLists }) {
         load();
     }, [id, getListById]);
 
+    // Redirect after logout
+    useEffect(() => {
+        if (!user) {
+            navigate("/login");
+        }
+        // eslint-disable-next-line
+    }, [user]);
+
     if (shoppingListCall?.state === "error") {
         return (
             <div style={{ color: mode === "light" ? "black" : "white" }}>
@@ -51,10 +61,10 @@ function Detail({ currentUser, users, shoppingLists }) {
         );
     }
 
-    const isAuthorized = shoppingList && shoppingList.memberIds?.includes(currentUser.id);
+    const isAuthorized = shoppingList && shoppingList.memberIds?.includes(currentUser?.id);
 
     return (
-        <div style={{ marginLeft: 15, marginRight: 15 }}>
+        <div>
             {isAuthorized ? (
                 <>
                     <Button style={{ marginLeft: 30, display: "flex", alignItems: "center" }} onClick={() => navigate("/list")}>

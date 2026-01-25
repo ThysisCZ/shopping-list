@@ -11,6 +11,9 @@ const router = express.Router();
 router.route('/user/register').post(userController.registerUserController);
 router.route('/user/login').post(userController.loginUserController);
 router.route('/user/list').get(authenticateToken, userController.listUsersController);
+router.route('/user/forgot-password').post(userController.requestPasswordResetController);
+router.route('/user/verify-reset-code').post(userController.verifyResetCodeController);
+router.route('/user/reset-password').post(userController.resetPasswordController);
 
 
 router.route('/shoppingList/list').get(authenticateToken, shoppingListController.listShoppingListsController);

@@ -95,15 +95,25 @@ function ShoppingLists() {
         }
     }
 
-    useEffect(() => {
-        refreshLists();
-        // eslint-disable-next-line
-    }, [showArchived, user]);
-
+    // Load all users on mount
     useEffect(() => {
         getAllUsers()
         // eslint-disable-next-line
     }, []);
+
+    // Refresh lists after archive toggle
+    useEffect(() => {
+        refreshLists();
+        // eslint-disable-next-line
+    }, [showArchived]);
+
+    // Redirect after logout
+    useEffect(() => {
+        if (!user) {
+            navigate("/login");
+        }
+        // eslint-disable-next-line
+    }, [user]);
 
     const handleAddItemShow = () => {
         setAddItemShow(true);
@@ -326,11 +336,14 @@ function ShoppingLists() {
 
     // Check if user is owner
     const isOwner = (list) => {
-        return list.ownerId === user.id;
+        return list.ownerId === user?.id;
     };
 
     return (
-        <Container className="mt-3" style={{ color: mode === "light" ? "black" : "white" }}>
+        <Container className="mt-3" style={{
+            color: mode === "light" ? "black" : "white",
+            paddingLeft: 25, paddingRight: 25, marginBottom: 25
+        }}>
             <Row className="mb-4">
                 <Col>
                     <h1>{currentLanguage.id === "EN" ? "Shopping Lists" : "Nákupní seznamy"}</h1>

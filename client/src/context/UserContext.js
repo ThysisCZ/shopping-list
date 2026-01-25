@@ -13,6 +13,7 @@ export function UserProvider({ children }) {
     const [user, setUser] = useState(null);
     const [users, setUsers] = useState(null);
     const [token, setToken] = useState(null);
+    const [logoutCall, setLogoutCall] = useState("inactive");
 
     // Login function - stores user data and token
     const login = (userData, authToken) => {
@@ -22,8 +23,14 @@ export function UserProvider({ children }) {
 
     // Logout function - clears everything
     const logout = () => {
-        setUser(null);
-        setToken(null);
+        setLogoutCall("pending");
+
+        setTimeout(() => {
+            setUser(null);
+            setToken(null);
+
+            setLogoutCall("success");
+        }, 2000);
     };
 
     // Value that will be accessible to all components
@@ -33,7 +40,8 @@ export function UserProvider({ children }) {
         setUsers,
         token,
         login,
-        logout
+        logout,
+        logoutCall
     };
 
     return (

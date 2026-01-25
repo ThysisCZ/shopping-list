@@ -21,6 +21,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 6
+    },
+    resetCode: {
+        type: String,
+        default: null
+    },
+    resetCodeExpiry: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true

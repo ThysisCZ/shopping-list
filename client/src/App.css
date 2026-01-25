@@ -1,5 +1,5 @@
 .Top-panel-container {
-    margin: 20px;
+    margin: 20px 0px 20px 0px;
     display: flex;
     justify-content: space-between;
 }
@@ -56,6 +56,11 @@
 }
 
 @media (max-width: 576px) {
+    .Settings-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .Lists-stats {
         height: 400px
     }

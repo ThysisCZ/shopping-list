@@ -1,8 +1,10 @@
 import styles from "../css/register.module.css";
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Col, Row, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiEye, mdiEyeOff } from '@mdi/js';
+import { useLanguageContext } from '../context/LanguageContext';
 
 function Register() {
     const defaultForm = {
@@ -11,8 +13,10 @@ function Register() {
         password: ''
     }
 
-    const URI = "http://localhost:8000";
+    const SERVER_URI = process.env.REACT_APP_SERVER_URI;
 
+    const navigate = useNavigate();
+    const { currentLanguage } = useLanguageContext();
     const [validated, setValidated] = useState(false);
     const [formData, setFormData] = useState(defaultForm);
     const [registerCall, setRegisterCall] = useState({ state: "inactive" });
@@ -35,7 +39,7 @@ function Register() {
             setRegisterCall({ state: "pending" })
             setMessage({ type: '', text: '' });
 
-            const response = await fetch(`${URI}/user/register`, {
+            const response = await fetch(`${SERVER_URI}/user/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -53,18 +57,9 @@ function Register() {
                     }
                 )
 
-                // Show success message
-                setMessage({ type: 'success', text: 'Registration successful!' });
-
                 // Clear form
                 setFormData(defaultForm);
                 setValidated(false)
-
-                // Clear success message after 3 seconds
-                setTimeout(() => {
-                    setMessage({ type: '', text: '' });
-                    setRegisterCall({ state: "inactive" });
-                }, 3000);
             } else {
                 console.error('Registration failed: ' + data.message)
                 setRegisterCall({ state: "error", error: data.message });
@@ -73,23 +68,22 @@ function Register() {
         } catch (e) {
             console.error('Registration error:', e)
             setRegisterCall({ state: "error", error: e })
-            setMessage({ type: 'error', text: 'Network error. Please try again.' });
+            setMessage({ type: 'error', text: currentLanguage.id === "EN" ? "Network error. Please try again." : "Chyba sítě. Zkuste to prosím znovu." });
         }
     }
 
     return (
         <div className={styles.registerContainer}>
-            <h2>User Registration</h2>
+            <h2>{currentLanguage.id === "EN" ? "Sign Up" : "Registrace"}</h2>
 
             <Container>
-                <Row>
-                    <Col></Col>
-                    <Col md={10}>
+                <Row className="justify-content-center">
+                    <Col xs={10}>
                         <Form noValidate validated={validated} onSubmit={handleSubmit}>
                             <Stack gap={2}>
                                 <Form.Group>
                                     <div className={styles.formLabel}>
-                                        <Form.Label>Name:</Form.Label>
+                                        <Form.Label>{currentLanguage.id === "EN" ? "Username" : "Uživatelské jméno"}:</Form.Label>
                                     </div>
                                     <Form.Control
                                         type="text"
@@ -104,7 +98,7 @@ function Register() {
                                         }
                                     />
                                     <Form.Control.Feedback type="invalid">
-                                        {validated && formData.name.length === 0 && "This field is required."}
+                                        {validated && formData.name.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                     </Form.Control.Feedback>
                                 </Form.Group>
 
@@ -125,12 +119,12 @@ function Register() {
                                         }
                                     />
                                     <Form.Control.Feedback type="invalid">
-                                        {validated && formData.email.length === 0 && "This field is required."}
+                                        {validated && formData.email.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                     </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <Form.Group>
-                                    <Form.Label className={styles.formLabel}>Password:</Form.Label>
+                                    <Form.Label className={styles.formLabel}>{currentLanguage.id === "EN" ? "Password" : "Heslo"}:</Form.Label>
                                     <div className={styles.passwordInputWrapper}>
                                         <Form.Control
                                             type={showPassword ? "text" : "password"}
@@ -153,23 +147,40 @@ function Register() {
                                             {showPassword ? <Icon path={mdiEyeOff} size={1} /> : <Icon path={mdiEye} size={1} />}
                                         </button>
                                         <Form.Control.Feedback type="invalid" className={styles.passwordFeedback}>
-                                            {validated && formData.password.length === 0 && "This field is required."}
+                                            {validated && formData.password.length === 0 && (currentLanguage.id === "EN" ? "This field is required." : "Toto pole je povinné.")}
                                         </Form.Control.Feedback>
                                     </div>
                                 </Form.Group>
                             </Stack>
 
-                            <div className={styles.registerButton}>
+                            <div className={styles.authButton} style={{ marginTop: 25 }}>
                                 <Button
                                     variant="primary"
                                     type="submit"
+                                    disabled={registerCall.state === "pending"}
                                 >
-                                    Register
+                                    {registerCall.state === "pending" ?
+                                        currentLanguage.id === "EN" ? "Signing up..." : "Registrování..." :
+                                        currentLanguage.id === "EN" ? "Sign Up" : "Registrovat se"}
+                                </Button>
+                            </div>
+
+                            <div className={styles.loginText}>
+                                {currentLanguage.id === "EN" ? "Already have an account?" : "Máte vytvořený účet?"}
+                            </div>
+
+                            <div className={styles.authButton}>
+                                <Button
+                                    variant="secondary"
+                                    type="submit"
+                                    disabled={registerCall.state === "pending"}
+                                    onClick={() => navigate("/login")}
+                                >
+                                    {currentLanguage.id === "EN" ? "Login" : "Přihlásit se"}
                                 </Button>
                             </div>
                         </Form>
                     </Col>
-                    <Col></Col>
                 </Row>
             </Container>
 
