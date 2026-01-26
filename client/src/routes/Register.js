@@ -5,6 +5,7 @@ import { Form, Button, Container, Col, Row, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiEye, mdiEyeOff } from '@mdi/js';
 import { useLanguageContext } from '../context/LanguageContext';
+import { useUserContext } from '../context/UserContext';
 
 function Register() {
     const defaultForm = {
@@ -17,6 +18,7 @@ function Register() {
 
     const navigate = useNavigate();
     const { currentLanguage } = useLanguageContext();
+    const { login } = useUserContext();
     const [validated, setValidated] = useState(false);
     const [formData, setFormData] = useState(defaultForm);
     const [registerCall, setRegisterCall] = useState({ state: "inactive" });
@@ -55,11 +57,19 @@ function Register() {
                         state: "success",
                         data: [registerCall.data, data]
                     }
-                )
+                );
+
+                // Store user data and token in context
+                login(data.user, data.token);
 
                 // Clear form
                 setFormData(defaultForm);
                 setValidated(false)
+
+                // Redirect after 1 second
+                setTimeout(() => {
+                    navigate('/list');
+                }, 1000);
             } else {
                 console.error('Registration failed: ' + data.message)
                 setRegisterCall({ state: "error", error: data.message });

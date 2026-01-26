@@ -50,11 +50,11 @@ function ForgotPassword() {
                     data: data
                 })
 
-                setMessage({ 
-                    type: 'success', 
-                    text: currentLanguage.id === "EN" 
-                        ? "If the email exists, a reset code has been sent to your email." 
-                        : "Pokud email existuje, byl vám odeslán resetovací kód." 
+                setMessage({
+                    type: 'success',
+                    text: currentLanguage.id === "EN"
+                        ? "A reset code has been sent to your email."
+                        : "Potvrzovací kód byl úspěšně odeslán."
                 });
 
                 // Navigate to reset password page after 2 seconds

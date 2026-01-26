@@ -5,17 +5,8 @@ require('dotenv').config();
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
-// Check if API key is configured
-if (!BREVO_API_KEY) {
-    console.warn('Warning: BREVO_API_KEY environment variable is not set. Email functionality will not work.');
-}
-
 // Send password reset code
 module.exports.sendPasswordResetCode = async (email, code) => {
-    // Check if API key is configured
-    if (!BREVO_API_KEY) {
-        throw new Error('Email service is not configured. Please set BREVO_API_KEY environment variable.');
-    }
 
     const emailData = {
         sender: {
