@@ -51,12 +51,12 @@ function App() {
                     <div className="Top-panel-container" style={{ color: mode === "light" ? "black" : "white" }}>
                         {user !== null ?
                             <Button style={{ marginLeft: 15, display: "flex", alignItems: "center", height: 40 }}
-                                onClick={() => logout()}
+                                onClick={logout}
                                 disabled={logoutCall === "pending"}
                             >
                                 <Stack direction="horizontal" gap={1}>
                                     {logoutCall === "pending" ?
-                                        <div stlye>
+                                        <div>
                                             <Icon path={mdiLogout} size={1} /> {currentLanguage.id === "EN" ? "Loading..." : "Odhlašování..."}
                                         </div> :
                                         <div>

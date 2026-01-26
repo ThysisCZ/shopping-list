@@ -43,8 +43,6 @@ export function ShoppingListsProvider({ children }) {
                 const dtoOut = result.data;
                 setShoppingLists(dtoOut);
 
-                console.log("All lists:", dtoOut);
-
                 return dtoOut;
             } catch (e) {
                 console.error("Error: " + e.message);

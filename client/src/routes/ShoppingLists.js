@@ -87,8 +87,6 @@ function ShoppingLists() {
             const result = await response.json();
             const dtoOut = result.data;
 
-            console.log("All users", dtoOut)
-
             setUsers(dtoOut);
         } catch (e) {
             console.error("Error: " + e.message)
