@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 // Email configuration
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
+const SENDER_EMAIL = process.env.SENDER_EMAIL;
 
 // Check if email credentials are configured
 if (!EMAIL_USER || !EMAIL_PASS) {
@@ -15,7 +16,9 @@ if (!EMAIL_USER || !EMAIL_PASS) {
 
 // Create transporter (only if credentials are available)
 const transporter = EMAIL_USER && EMAIL_PASS ? nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS
@@ -24,18 +27,18 @@ const transporter = EMAIL_USER && EMAIL_PASS ? nodemailer.createTransport({
 
 // Send password reset code
 module.exports.sendPasswordResetCode = (email, code) => {
-    return new Promise((resolve, reject) => {
-        // Check if transporter is configured
-        if (!transporter) {
-            reject(new Error('Email service is not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.'));
-            return;
-        }
 
-        const mailOptions = {
-            from: EMAIL_USER,
-            to: email,
-            subject: 'Password Reset Code',
-            html: `
+    // Check if transporter is configured
+    if (!transporter) {
+        reject(new Error('Email service is not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.'));
+        return;
+    }
+
+    const mailOptions = {
+        from: SENDER_EMAIL,
+        to: email,
+        subject: 'Shopping List App - Password Reset',
+        html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #333;">Password Reset Request</h2>
                     <p>You have requested to reset your password. Please use the following 6-digit code:</p>
@@ -46,15 +49,13 @@ module.exports.sendPasswordResetCode = (email, code) => {
                     <p>If you did not request this password reset, please ignore this email.</p>
                 </div>
             `
-        };
+    };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(info);
-            }
-        });
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            reject(error);
+        } else {
+            resolve(info);
+        }
     });
-};
-
+}
