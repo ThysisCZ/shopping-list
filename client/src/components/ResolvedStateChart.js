@@ -39,12 +39,12 @@ function ResolvedStateChart({ shoppingList, isAnimationActive = true }) {
 
     return (
         <>
-            <h1 style={{ marginLeft: 30, color: mode === "light" ? "black" : "white" }}>
-                {currentLanguage.id === "EN" ? "Resolved / Unresolved" : "Vyřešeno / Nevyřešeno"}
-            </h1>
             {items.length !== 0 ?
                 <div>
-                    <PieChart style={{ width: '100%', maxWidth: '500px', maxHeight: '80vh', aspectRatio: 1 }} responsive>
+                    <PieChart style={{
+                        width: '100%', maxWidth: '500px', maxHeight: '80vh', aspectRatio: 1,
+                        marginLeft: "auto", marginRight: "auto"
+                    }} responsive>
                         <Pie
                             data={data}
                             labelLine={false}

@@ -1,5 +1,5 @@
 import styles from "../css/login.module.css";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Container, Col, Row, Stack } from 'react-bootstrap';
 import Icon from '@mdi/react';
 import { mdiEye, mdiEyeOff } from '@mdi/js';
@@ -20,9 +20,16 @@ function Login() {
     const [loginCall, setLoginCall] = useState({ state: "inactive" });
     const [message, setMessage] = useState({ type: '', text: '' });
     const [showPassword, setShowPassword] = useState(false);
-    const { login } = useUserContext();
+    const { login, user } = useUserContext();
     const { currentLanguage } = useLanguageContext();
     const navigate = useNavigate();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            navigate('/list');
+        }
+    }, [user, navigate]);
 
     const setField = (name, val) => {
         setFormData((formData) => ({ ...formData, [name]: val }));

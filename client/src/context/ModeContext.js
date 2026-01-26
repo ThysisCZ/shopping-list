@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 // Create mode context
 const ModeContext = createContext();
@@ -16,6 +16,12 @@ export function ModeProvider({ children }) {
         mode,
         setMode
     }
+
+    // Set mode context with localStorage on mount
+    useEffect(() => {
+        const storedMode = localStorage.getItem('mode');
+        setMode(storedMode);
+    }, []);
 
     return (
         <ModeContext.Provider value={value}>

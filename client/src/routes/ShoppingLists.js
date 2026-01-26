@@ -342,7 +342,7 @@ function ShoppingLists() {
     return (
         <Container className="mt-3" style={{
             color: mode === "light" ? "black" : "white",
-            paddingLeft: 25, paddingRight: 25, marginBottom: 25
+            paddingLeft: 15, paddingRight: 15, marginBottom: 25
         }}>
             <Row className="mb-4">
                 <Col>
@@ -354,7 +354,7 @@ function ShoppingLists() {
                 <Col>
                     <Form.Check
                         type="switch"
-                        label={currentLanguage.id === "EN" ? "Show archived" : "Zobrazit archivované"}
+                        label={currentLanguage.id === "EN" ? "Show archived" : "Zobrazit uložené"}
                         checked={showArchived}
                         onChange={() => setShowArchived(!showArchived)}
                     />
@@ -395,7 +395,7 @@ function ShoppingLists() {
                                                         }}
                                                             style={{ display: "flex", alignItems: "center" }}>
                                                             <Stack direction="horizontal" gap={1}>
-                                                                <Icon path={mdiPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Add Item" : "Přidat položku"}
+                                                                <Icon path={mdiPlus} size={0.7} /> {currentLanguage.id === "EN" ? "Item" : "Položka"}
                                                             </Stack>
                                                         </Button>
                                                     </div>

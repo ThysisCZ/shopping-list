@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import mockData from '../mockData.json';
 
 // Create language context
@@ -23,6 +23,12 @@ export function LanguageProvider({ children }) {
         currentLanguage,
         setCurrentLanguage
     }
+
+    // Set language context with localStorage on mount
+    useEffect(() => {
+        const storedLanguage = localStorage.getItem('language');
+        setCurrentLanguage(JSON.parse(storedLanguage));
+    }, []);
 
     return (
         <LanguageContext.Provider value={value}>

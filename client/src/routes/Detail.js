@@ -67,7 +67,7 @@ function Detail({ currentUser, users, shoppingLists }) {
         <div>
             {isAuthorized ? (
                 <>
-                    <Button style={{ marginLeft: 30, display: "flex", alignItems: "center" }} onClick={() => navigate("/list")}>
+                    <Button style={{ marginLeft: 15, display: "flex", alignItems: "center" }} onClick={() => navigate("/list")}>
                         <Stack direction="horizontal" gap={1}>
                             <Icon path={mdiArrowLeft} size={1} /> {currentLanguage.id === "EN" ? "Back" : "Zpět"}
                         </Stack>

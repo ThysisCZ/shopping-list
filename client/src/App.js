@@ -26,8 +26,10 @@ function App() {
     const handleModeChange = () => {
         if (mode === "light") {
             setMode("dark");
+            localStorage.setItem('mode', "dark");
         } else {
             setMode("light");
+            localStorage.setItem('mode', "light");
         }
     }
 
@@ -36,6 +38,7 @@ function App() {
 
         if (languageData) {
             setCurrentLanguage(languageData);
+            localStorage.setItem('language', JSON.stringify(languageData));
         }
     }
 
@@ -47,14 +50,14 @@ function App() {
                 <div style={{ backgroundColor: mode === "light" ? "white" : "#212121" }}>
                     <div className="Top-panel-container" style={{ color: mode === "light" ? "black" : "white" }}>
                         {user !== null ?
-                            <Button style={{ marginLeft: 27, display: "flex", alignItems: "center", height: 40 }}
+                            <Button style={{ marginLeft: 15, display: "flex", alignItems: "center", height: 40 }}
                                 onClick={() => logout()}
                                 disabled={logoutCall === "pending"}
                             >
                                 <Stack direction="horizontal" gap={1}>
                                     {logoutCall === "pending" ?
-                                        <div>
-                                            <Icon path={mdiLogout} size={1} /> {currentLanguage.id === "EN" ? "Logging out..." : "Odhlašování..."}
+                                        <div stlye>
+                                            <Icon path={mdiLogout} size={1} /> {currentLanguage.id === "EN" ? "Loading..." : "Odhlašování..."}
                                         </div> :
                                         <div>
                                             <Icon path={mdiLogout} size={1} /> {currentLanguage.id === "EN" ? "Logout" : "Odhlásit se"}

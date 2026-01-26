@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 // Create user context
 const UserContext = createContext();
@@ -15,10 +15,24 @@ export function UserProvider({ children }) {
     const [token, setToken] = useState(null);
     const [logoutCall, setLogoutCall] = useState("inactive");
 
+    // Load user data from localStorage on mount
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        if (storedToken && storedUser) {
+            setToken(storedToken);
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
     // Login function - stores user data and token
     const login = (userData, authToken) => {
         setUser(userData);
         setToken(authToken);
+
+        // Persist to localStorage
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('user', JSON.stringify(userData));
     };
 
     // Logout function - clears everything
@@ -28,6 +42,10 @@ export function UserProvider({ children }) {
         setTimeout(() => {
             setUser(null);
             setToken(null);
+
+            // Clear localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
 
             setLogoutCall("success");
         }, 2000);
