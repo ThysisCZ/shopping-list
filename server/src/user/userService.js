@@ -39,28 +39,24 @@ module.exports.registerUserService = (userDetails) => {
                 return userModelData.save();
             })
             // Login after registering
-            .then(() => {
-                // Find user by email
-                userModel.findOne({ email: userDetails.email })
-                    .then((user) => {
-                        // Create JWT token
-                        const token = jwt.sign(
-                            { id: user._id, email: user.email },
-                            JWT_SECRET,
-                            { expiresIn: '24h' }
-                        );
+            .then((user) => {
+                // Create JWT token
+                const token = jwt.sign(
+                    { id: user._id, email: user.email },
+                    JWT_SECRET,
+                    { expiresIn: '24h' }
+                );
 
-                        // Return token and user data
-                        resolve({
-                            success: true,
-                            token: token,
-                            user: {
-                                id: user._id,
-                                name: user.name,
-                                email: user.email
-                            }
-                        });
-                    })
+                // Return token and user data
+                resolve({
+                    success: true,
+                    token: token,
+                    user: {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email
+                    }
+                });
             })
             .catch((error) => {
                 reject(error);

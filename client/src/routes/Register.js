@@ -70,6 +70,8 @@ function Register() {
                 setTimeout(() => {
                     navigate('/list');
                 }, 1000);
+
+                console.log("Register", data);
             } else {
                 console.error('Registration failed: ' + data.message)
                 setRegisterCall({ state: "error", error: data.message });
