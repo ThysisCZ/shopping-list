@@ -55,7 +55,7 @@ function Register() {
                 setRegisterCall(
                     {
                         state: "success",
-                        data: [registerCall.data, data]
+                        data: data
                     }
                 );
 
