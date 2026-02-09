@@ -10,13 +10,13 @@ module.exports.sendPasswordResetCode = async (email, code) => {
 
     const emailData = {
         sender: {
-            name: "Shopping List App",
+            name: "Shopgress",
             email: SENDER_EMAIL
         },
         to: [{
             email: email
         }],
-        subject: 'Shopping List App - Password Reset',
+        subject: 'Shopgress - Password Reset',
         htmlContent: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #333;">Password Reset Request</h2>
